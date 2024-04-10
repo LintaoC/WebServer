@@ -38,7 +38,7 @@ include_directories(include)
 # add_library(example_lib src/example_lib.cc)
 
 # Create an executable named 'server' from the source file located at src/server_main.cc
-add_executable(server src/server_main.cc)
+add_executable(server src/server_main.cc src/server.cc src/session.cc)
 
 # Link the 'server' executable with the Boost::system library to utilize Boost System components
 target_link_libraries(server Boost::system)
