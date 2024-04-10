@@ -1,0 +1,7 @@
+.DS_Store
+.vscode
+.idea
+cmake-build-debug
+build
+build_*
+mirror
