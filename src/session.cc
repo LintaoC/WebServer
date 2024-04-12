@@ -1,4 +1,7 @@
 #include "session.h"
+#include <boost/asio.hpp>
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
 
 session::session(boost::asio::io_service& io_service)
         : socket_(io_service)

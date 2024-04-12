@@ -13,8 +13,6 @@
 #include <boost/asio.hpp>
 #include "server.h"
 
-using boost::asio::ip::tcp;
-
 int main(int argc, char* argv[])
 {
   try

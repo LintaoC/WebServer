@@ -2,7 +2,6 @@
 #define SESSION_H
 
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 
 using boost::asio::ip::tcp;
 

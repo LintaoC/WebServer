@@ -1,4 +1,8 @@
 #include "server.h"
+#include "session.h"
+#include <boost/asio.hpp>
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
 
 server::server(boost::asio::io_service& io_service, short port)
         : io_service_(io_service),
