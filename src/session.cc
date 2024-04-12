@@ -1,6 +1,7 @@
 #include "session.h"
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
+#include <iostream>
 using namespace boost::placeholders;
 
 // Constructor for the 'session' class
@@ -35,7 +36,7 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
                                  boost::asio::buffer(data_, bytes_transferred),
                                  boost::bind(&session::handle_write, this,
                                              boost::asio::placeholders::error));
-    }
+        }
     else
     {
         delete this;
@@ -45,6 +46,7 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
 // handle the completion of a write operation
 void session::handle_write(const boost::system::error_code &error)
 {
+    std::cout << "session received: complete";
     // Check if the write operation completed successfully
     if (!error)
     {

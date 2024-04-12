@@ -1,5 +1,6 @@
-#include "server.h"
-#include "session.h"
+#include "../include/server.h"
+#include "../include/session.h"
+#include "../include/config_parser.h"
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 using namespace boost::placeholders;
@@ -9,6 +10,7 @@ server::server(boost::asio::io_service &io_service, short port)
     : io_service_(io_service),                              // Initialize the io_service_ member with the provided io_service
       acceptor_(io_service, tcp::endpoint(tcp::v4(), port)) // Initialize the acceptor to listen on the given port with IPv4
 {
+    std::cout << "Server started on port " << port << std::endl;
     start_accept(); // Begin accepting connections
 }
 

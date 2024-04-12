@@ -5,3 +5,36 @@ cmake-build-debug
 build
 build_*
 mirror
+
+# Ignore build folders
+/CMakeFiles/
+/CMakeCache.txt
+/CMakeScripts/
+Makefile
+cmake_install.cmake
+*.cmake
+!CMakeLists.txt
+
+# Ignore object files, archives, and executables
+*.o
+*.a
+*.so
+*.out
+*.exe
+*.dll
+*.lib
+
+# Ignore specific build output directories
+/bin/
+/lib/
+/Testing/
+googletest/
+
+# Optional: Ignore all directories named build
+**/build/
+
+# Ignore editor settings
+*.swp
+*.swo
+.vscode/
+.idea/

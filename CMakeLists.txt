@@ -38,14 +38,19 @@ include_directories(include)
 # add_library(example_lib src/example_lib.cc)
 
 # Create an executable named 'server' from the source file located at src/server_main.cc
-add_executable(server src/server_main.cc src/server.cc src/session.cc)
-
+add_executable(server 
+    src/server_main.cc 
+    src/server.cc 
+    src/session.cc 
+    src/config_parser.cc
+)
 # Link the 'server' executable with the Boost::system library to utilize Boost System components
 target_link_libraries(server Boost::system)
-
 # TODO(!): Update test executable name, srcs, and deps
 # add_executable(example_lib_test tests/example_lib_test.cc)
 # target_link_libraries(example_lib_test example_lib gtest_main)
+
+
 
 # TODO(!): Update with test binary
 # gtest_discover_tests(example_lib_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
