@@ -30,4 +30,4 @@ ENTRYPOINT ["./server"]
 
 # Use CMD to specify arguments to ENTRYPOINT
 # TODO(!): Update with real server args
-CMD ["simple_config"]
+CMD ["../simple_config"]
