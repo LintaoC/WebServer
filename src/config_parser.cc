@@ -287,26 +287,34 @@ bool NginxConfigParser::Parse(std::istream *config_file, NginxConfig *config)
     }
     else if (token_type == TOKEN_TYPE_END_BLOCK)
     {
-      if (last_token_type != TOKEN_TYPE_STATEMENT_END)
-      {
+      // if (last_token_type != TOKEN_TYPE_STATEMENT_END)
+      // {
         // FIX:  if last token is TOKEN_TYPE_END_BLOCK, which is nested block
-        if (last_token_type == TOKEN_TYPE_END_BLOCK)
-        {
-          config_stack.pop();
-          continue;
-        }
+      //   if (last_token_type == TOKEN_TYPE_END_BLOCK)
+      //   {
+      //     config_stack.pop();
+      //     continue;
+      //   }
+      //   // Error.
+      //   else
+      //   {
+      //     std::cout << "last_token_type: " << TokenTypeAsString(last_token_type) << std::endl;
+      //     printf("the token_type is end_block, the last_token type is not statement_end... ");
+      //     break;
+      //   }
+      // }
+      if (config_stack.size() == 1) {
         // Error.
-        else
-        {
-          std::cout << "last_token_type: " << TokenTypeAsString(last_token_type) << std::endl;
-          printf("the token_type is end_block, the last_token type is not statement_end... ");
-          break;
-        }
+        break;
       }
       config_stack.pop();
     }
     else if (token_type == TOKEN_TYPE_EOF)
     {
+      if (config_stack.size() != 1) {
+        // Error.
+        break;
+      }
       if (last_token_type != TOKEN_TYPE_STATEMENT_END &&
           last_token_type != TOKEN_TYPE_END_BLOCK)
       {
