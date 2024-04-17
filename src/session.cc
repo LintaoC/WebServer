@@ -69,7 +69,8 @@ void session::send_response()
                     << "Content-Length: " << request_data_.length() << "\r\n"
                     << "Date: " << get_date() << "\r\n"
                     << "\r\n"
-                    << request_data_;
+                    << request_data_
+                    << "\n";
 
     boost::asio::async_write(socket_,
                              boost::asio::buffer(response_stream.str()),
