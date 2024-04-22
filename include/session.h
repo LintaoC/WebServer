@@ -10,7 +10,7 @@ class session {
 public:
     explicit session(boost::asio::io_service& io_service);
     tcp::socket& socket();
-    void start();
+    virtual void start();
 
 private:
     void handle_read(const boost::system::error_code& error, size_t bytes_transferred);

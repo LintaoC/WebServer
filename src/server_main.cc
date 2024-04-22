@@ -13,7 +13,7 @@
 #include <boost/asio.hpp>
 #include "../include/server.h"
 #include "../include/config_parser.h"
-
+#include "../include/SessionFactory.h" 
 // int main(int argc, char *argv[])
 // {
 
@@ -61,8 +61,9 @@ int main(int argc, char* argv[]) {
     }
 
     boost::asio::io_service io_service;
+    SessionFactory factory;
     try {
-        server s(io_service, port);
+        server s(io_service, port,&factory);
         io_service.run();
     } catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << "\n";
