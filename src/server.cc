@@ -38,3 +38,4 @@ void server::handle_accept(session *new_session, const boost::system::error_code
 
     start_accept(); // Call start_accept again to accept next incoming connection
 }
+

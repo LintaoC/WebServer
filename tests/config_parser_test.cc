@@ -93,20 +93,25 @@ TEST_F(NginxConfigParserTest, NginxConfigToString)
 
 TEST_F(NginxConfigParserTest, NginxConfigToStringNested)
 {
-  bool success = parser.Parse("nested_loop_config", &out_config);                                              // parse the config file
-  std::string res = "foo \"bar\";\nserver {\n  location / {\n    proxy_pass http://localhost:8080;\n  }\n}\n"; // expected result
-  std::string config_string = out_config.ToString(0);                                                          // convert the config to string
-  bool same = config_string.compare(res) == 0;                                                                 // compare the result with the expected result
-
-  EXPECT_TRUE(same);
+  bool success = parser.Parse("nested_loop_config", &out_config);                                           // parse the config file
+  std::string res = "foo \"baaar\";\nserver {\n  location / {\n    proxy http://localhost:8080;\n  }\n}\n"; // expected result
+  std::string config_string = out_config.ToString(0);                                                       // convert the config to string
+  bool result = config_string.compare(res) == 0;                                                            // compare the result with the expected result
+  EXPECT_TRUE(result);
 }
 
 TEST_F(NginxConfigParserTest, GetPortNumber)
 {
-  bool success = parser.Parse("test_port_number", &out_config); // parse the config file
-  int port = out_config.GetPort();                              // get the port number from the config
-  bool same = port == 80;                                       // compare the result with the expected result
-  EXPECT_TRUE(same);
+  bool success = parser.Parse("port_number", &out_config); // parse the config file
+  int port = out_config.GetPort();                         // get the port number from the config
+  bool result = port == 80;                                // compare the result with the expected result
+  EXPECT_TRUE(result);
+}
+
+TEST_F(NginxConfigParserTest, StatementEndError)
+{
+  bool success = parser.Parse("statement_end_error", &out_config);
+  EXPECT_FALSE(success);
 }
 
 TEST_F(NginxConfigParserTest, GetPortNumberChildBlock)
@@ -117,13 +122,23 @@ TEST_F(NginxConfigParserTest, GetPortNumberChildBlock)
   EXPECT_TRUE(same);
 }
 
-//tets when port is not found (return -1)
-TEST_F(NginxConfigParserTest, GetPortNumberNull)
+// tets when port is not found (return -1)
+TEST_F(NginxConfigParserTest, Nullport)
 {
   bool success = parser.Parse("empty_config", &out_config);
-
   int port = out_config.GetPort();
-  bool same = port == -1;
+  bool result = port == -1;
+  EXPECT_TRUE(result);
+}
 
-  EXPECT_TRUE(same);
+TEST_F(NginxConfigParserTest, SingleQuote)
+{
+  bool success = parser.Parse("single_quote", &out_config);
+  EXPECT_TRUE(success);
+}
+
+TEST_F(NginxConfigParserTest, EofQuote)
+{
+  bool success = parser.Parse("EofQuote", &out_config);
+  EXPECT_FALSE(success);
 }

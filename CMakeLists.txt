@@ -52,4 +52,4 @@ gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 
 # Coverage configuration
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server server_core config_parser TESTS config_parser_test server_test session_test)
+generate_coverage_report(TARGETS server_core config_parser TESTS config_parser_test server_test session_test)
