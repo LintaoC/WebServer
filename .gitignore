@@ -12,7 +12,6 @@ mirror
 /CMakeScripts/
 Makefile
 cmake_install.cmake
-*.cmake
 !CMakeLists.txt
 
 # Ignore object files, archives, and executables
