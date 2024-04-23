@@ -17,7 +17,7 @@ RESPONSE=$(echo -ne "POST /submit-form HTTP/1.1\r\nHost: localhost\r\nContent-Ty
 CLEANED_RESPONSE=$(echo "$RESPONSE" | sed '/^Date:/d')
 
 # Normalize and save the actual response
-echo "$CLEANED_RESPONSE" | tr -d '\r' > test_response1
+echo "$CLEANED_RESPONSE" | tr -d '\r \n' > test_response1
 
 # Check the response
 echo -n "Test 1   "

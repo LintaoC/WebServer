@@ -1,10 +1,1 @@
-HTTP/1.1 200 OK
-Content-Type: text/plain
-Content-Length: 146
-
-POST /submit-form HTTP/1.1
-Host: localhost
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 27
-
-username=johndoe&password=1234
+HTTP/1.1200OKContent-Type:text/plainContent-Length:146POST/submit-formHTTP/1.1Host:localhostContent-Type:application/x-www-form-urlencodedContent-Length:27username=johndoe&password=1234
