@@ -62,15 +62,19 @@ function(generate_coverage_report)
 
         # Generage the HTML report, dependent on coverage data
         add_custom_command(OUTPUT ${COVERAGE_REPORT_FILE}
-            COMMAND ${CMAKE_COMMAND} -E remove_directory "${COVERAGE_REPORT_DIR}"
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${COVERAGE_REPORT_DIR}"
-            COMMAND "${GCOVR_PATH}" --html --html-details -s
-            -r "${CMAKE_SOURCE_DIR}"
-            --object-directory "${CMAKE_BINARY_DIR}"
-            -o "${COVERAGE_REPORT_FILE}"
-            DEPENDS ${COVERAGE_DATA_STAMP_FILE}
-            COMMENT "Generating coverage report"
-            VERBATIM)
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${COVERAGE_REPORT_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${COVERAGE_REPORT_DIR}"
+        COMMAND "${GCOVR_PATH}" --html --html-details -s
+        -r "${CMAKE_SOURCE_DIR}"
+        --object-directory "${CMAKE_BINARY_DIR}"
+        -o "${COVERAGE_REPORT_FILE}"
+        --filter "${CMAKE_SOURCE_DIR}/src/session.cc"
+        --filter "${CMAKE_SOURCE_DIR}/src/config_parser.cc"
+        --filter "${CMAKE_SOURCE_DIR}/src/server.cc"
+        --exclude "${CMAKE_SOURCE_DIR}/include"
+        DEPENDS ${COVERAGE_DATA_STAMP_FILE}
+        COMMENT "Generating coverage report"
+        VERBATIM)
         add_custom_target(coverage DEPENDS ${COVERAGE_REPORT_FILE})
 
         # Clean up the report directory on make clean

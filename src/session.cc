@@ -77,19 +77,6 @@ void session::send_response()
                              boost::bind(&session::handle_write, this,
                                          boost::asio::placeholders::error));
 }
-
-void session::handle_write(const boost::system::error_code &error)
-{
-    if (!error)
-    {
-        delete this; // Close and delete session
-    }
-    else
-    {
-        delete this;
-    }
-}
-
 size_t session::get_content_length(const std::string &request)
 {
     std::size_t pos = request.find("Content-Length:");
@@ -109,6 +96,14 @@ std::string session::get_date()
     char buf[30];
     std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S %Z", &tm);
     return std::string(buf);
+}
+
+void session::handle_write(const boost::system::error_code &error)
+{
+    if (!error)
+    {
+        delete this; // Close and delete session
+    }
 }
 
 
