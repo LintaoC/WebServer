@@ -100,10 +100,9 @@ std::string session::get_date()
 
 void session::handle_write(const boost::system::error_code &error)
 {
-    if (!error)
-    {
-        delete this; // Close and delete session
-    }
+
+    delete this; // Close and delete session
+    
 }
 
 
