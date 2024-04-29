@@ -22,13 +22,18 @@ include_directories(include)
 
 # Library for handling parsing configuration files
 add_library(config_parser src/config_parser.cc)
-
+add_library(echo_handler src/EchoHandler.cc)
 # Library for core server functionality
 add_library(server_core
     src/server.cc
     src/session.cc
+    src/EchoHandler.cc
+    src/StaticFileHandler.cc
 )
 target_link_libraries(server_core Boost::system)
+#target_link_libraries(server_core echo_handler)
+
+
 
 # Main server executable
 add_executable(server src/server_main.cc)
@@ -42,12 +47,12 @@ gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE
 
 # Server tests
 add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server_core gtest_main gtest gmock)
+target_link_libraries(server_test server_core  gtest_main gtest gmock)
 gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Session tests
 add_executable(session_test tests/session_test.cc)
-target_link_libraries(session_test server_core gtest_main gtest gmock)
+target_link_libraries(session_test server_core  gtest_main gtest gmock)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Coverage configuration
