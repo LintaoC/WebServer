@@ -15,7 +15,7 @@ add_subdirectory(/usr/src/googletest googletest)
 
 # Use static libraries so binaries can be deployed without a full boost install
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.50 REQUIRED COMPONENTS system)
+find_package(Boost 1.50 REQUIRED COMPONENTS system log log_setup)
 message(STATUS "Boost version: ${Boost_VERSION}")
 
 include_directories(include)
@@ -37,7 +37,7 @@ target_link_libraries(server_core Boost::system)
 
 # Main server executable
 add_executable(server src/server_main.cc)
-target_link_libraries(server server_core config_parser)
+target_link_libraries(server server_core config_parser Boost::log_setup Boost::log)
 
 # Tests
 # Test for the config_parser

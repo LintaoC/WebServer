@@ -11,6 +11,13 @@
 #include <cstdlib>
 #include <iostream>
 #include <boost/asio.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/support/date_time.hpp>
 #include "../include/server.h"
 #include "../include/config_parser.h"
 #include "../include/SessionFactory.h" 
@@ -40,10 +47,38 @@
 
 //   return 0;
 // }
+void init_logging() {
+    namespace logging = boost::log;
+    namespace keywords = logging::keywords;
+    namespace sinks = logging::sinks;
+    namespace expr = logging::expressions;
+
+    // Create a console logger
+    logging::add_console_log(std::cout, keywords::format = expr::stream
+        << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S")
+        << ": <" << logging::trivial::severity
+        << "> " << expr::smessage);
+
+    // Create a file logger
+    logging::add_file_log(
+        keywords::file_name = "server_log_%Y-%m-%d_%H-%M-%S.log",
+        keywords::rotation_size = 10 * 1024 * 1024,  // file rotation at 10 MB
+        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+        keywords::format = expr::stream
+            << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S")
+            << ": <" << logging::trivial::severity
+            << "> " << expr::smessage);
+
+    // Add common attributes
+    logging::add_common_attributes();
+}
 
 int main(int argc, char* argv[]) {
+    init_logging();
+    BOOST_LOG_TRIVIAL(info) << "Server starting up";
     if (argc != 2) {
         std::cerr << "Usage: server <config_file>\n";
+        BOOST_LOG_TRIVIAL(info) << "Usage: server <config_file>";
         return 1;
     }
 
@@ -51,12 +86,14 @@ int main(int argc, char* argv[]) {
     NginxConfig config;
     if (!config_parser.Parse(argv[1], &config)) {
         std::cerr << "Failed to parse config file\n";
+        BOOST_LOG_TRIVIAL(info) << "Failed to parse config file";
         return 1;
     }
 
     int port = config.GetPort();
     if (port == -1) {
         std::cerr << "Port number not found in the configuration file.\n";
+        BOOST_LOG_TRIVIAL(info) << "Port number not found in the configuration file.";
         return 1;
     }
 
