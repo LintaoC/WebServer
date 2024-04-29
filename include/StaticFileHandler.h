@@ -23,6 +23,7 @@ private:
     void sendErrorResponse(int status_code, const std::string& message);
     std::string determineContentType(const std::string& path);
     bool endsWith(const std::string& value, const std::string& ending);
+    void handleWriteCompletion(const boost::system::error_code& ec);
 };
 
 #endif // STATIC_FILE_HANDLER_H

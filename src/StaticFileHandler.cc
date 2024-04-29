@@ -1,5 +1,6 @@
 #include "StaticFileHandler.h"
 #include <boost/bind/bind.hpp>
+#include <iostream>
 
 using boost::asio::ip::tcp;
 using namespace boost::placeholders;
@@ -7,7 +8,11 @@ using namespace boost::placeholders;
 StaticFileHandler::StaticFileHandler(tcp::socket& socket, const std::string& root_path)
     : socket_(socket), root_path_(root_path) {}
 
-StaticFileHandler::~StaticFileHandler() {}
+StaticFileHandler::~StaticFileHandler() {
+    if (file_.is_open()) {
+        file_.close(); // Ensure the file is closed when the handler is destroyed
+    }
+}
 
 void StaticFileHandler::handleRequest(const std::string& request_data) {
     std::istringstream request_stream(request_data);
@@ -16,7 +21,7 @@ void StaticFileHandler::handleRequest(const std::string& request_data) {
     std::istringstream line_stream(request_line);
     std::string method;
     line_stream >> method >> path_;
-    serveFile(root_path_ + path_);
+    serveFile(root_path_ + path_.substr(7));
 }
 
 void StaticFileHandler::serveFile(const std::string& path) {
@@ -35,13 +40,12 @@ void StaticFileHandler::serveFile(const std::string& path) {
     headers << "Content-Type: " << determineContentType(path) << "\r\n";
     headers << "Content-Length: " << file_size << "\r\n";
     headers << "Connection: close\r\n\r\n";
-
     boost::asio::async_write(socket_, boost::asio::buffer(headers.str()),
                              boost::bind(&StaticFileHandler::sendFileChunk, this));
 }
 
 void StaticFileHandler::sendFileChunk() {
-    buffer_.resize(1024 * 64);  // Smaller chunks
+    buffer_.resize(1024 * 64);
     file_.read(buffer_.data(), buffer_.size());
     std::size_t bytes_read = file_.gcount();
 
@@ -49,7 +53,8 @@ void StaticFileHandler::sendFileChunk() {
         boost::asio::async_write(socket_, boost::asio::buffer(buffer_.data(), bytes_read),
                                  boost::bind(&StaticFileHandler::sendFileChunk, this));
     } else {
-        socket_.close();
+        socket_.close();  // Close the socket after the last chunk has been sent
+        delete this;
     }
 }
 
@@ -61,8 +66,18 @@ void StaticFileHandler::sendErrorResponse(int status_code, const std::string& me
     response << "Connection: close\r\n\r\n";
     response << "<html><body><h1>" << status_code << " " << message << "</h1></body></html>";
 
-    boost::asio::async_write(socket_, boost::asio::buffer(response.str()),
-                             [](const boost::system::error_code& error, std::size_t) {});
+    std::string response_str = response.str();
+    boost::asio::async_write(
+            socket_, boost::asio::buffer(response_str),
+            boost::bind(&StaticFileHandler::handleWriteCompletion, this, boost::asio::placeholders::error)
+    );
+}
+
+void StaticFileHandler::handleWriteCompletion(const boost::system::error_code& ec) {
+    if (!ec) {
+        socket_.close();  // Close the socket after the response has been fully written
+    }
+    delete this;  // Delete the handler object
 }
 
 std::string StaticFileHandler::determineContentType(const std::string& path) {

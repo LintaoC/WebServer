@@ -16,7 +16,12 @@ void EchoHandler::handleRequest(const std::string& request_data) {
 
     boost::asio::async_write(socket_,
                              boost::asio::buffer(response_stream.str()),
-                             boost::bind(&tcp::socket::close, &socket_));
+                             boost::bind(&EchoHandler::handleWriteCompletion, this));
+}
+
+void EchoHandler::handleWriteCompletion() {
+    socket_.close();  // Close the socket after the response has been fully written
+    delete this;  // Delete the handler object
 }
 
 std::string EchoHandler::get_date() {
