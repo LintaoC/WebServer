@@ -54,6 +54,66 @@ int NginxConfig::GetPort() const {
     return -1; // Return -1 if no valid port is found
 }
 
+std::string GetFirstPathComponent(const std::string& path) {
+    if (path.empty() || path[0] != '/') {
+        return ""; // Return an empty string for empty or invalid paths.
+    }
+    // Find the position of the second slash.
+    size_t second_slash_pos = path.find('/', 1);
+    if (second_slash_pos == std::string::npos) {
+        return path; // Return the entire path if no second slash is found.
+    }
+
+    return path.substr(0, second_slash_pos); // Return the substring up to the second slash.
+}
+
+std::string NginxConfig::GetHandlerType(const std::string& url_path) const {
+    std::string first_component = GetFirstPathComponent(url_path); // Get the first component of the input path.
+
+    for (const auto& statement : statements_) {
+        if (!statement->tokens_.empty()) {
+            std::string full_token = statement->tokens_[0];
+            if(full_token == first_component){
+                return statement->tokens_[1];
+            }
+        }
+
+        if (statement->child_block_) {
+            std::string type = statement->child_block_->GetHandlerType(url_path);
+            if (!type.empty()) {
+                return type;
+            }
+        }
+    }
+
+    return ""; // Return an empty string if no valid handler is found.
+}
+
+std::string NginxConfig::GetFilePath(const std::string& url_path) const {
+    std::string first_component = GetFirstPathComponent(url_path); // Get the first component.
+
+    for (const auto& statement : statements_) {
+        if (!statement->tokens_.empty()) {
+            std::string full_token = statement->tokens_[0];
+
+            if(full_token == first_component){
+                return statement->tokens_[2];
+            }
+        }
+
+        if (statement->child_block_) {
+            std::string file_path = statement->child_block_->GetFilePath(url_path);
+            if (!file_path.empty()) {
+                return file_path;
+            }
+        }
+    }
+
+    return ""; // Return an empty string if no valid path is found.
+}
+
+
+
 // Generates a string for a single configuration statement.
 // It handles both simple statements (like key-value pairs) and blocks (statements that contain child blocks).
 // The method formats the statement with proper indentation based on its depth in the configuration hierarchy.

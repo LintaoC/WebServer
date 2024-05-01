@@ -7,14 +7,14 @@
 using namespace boost::placeholders;
 
 // Constructor for the 'server' class
-server::server(boost::asio::io_service& io_service, short port, ISessionFactory* factory)
-    : io_service_(io_service), acceptor_(io_service, tcp::endpoint(tcp::v4(), port)), factory_(factory) {
+server::server(boost::asio::io_service& io_service, short port, ISessionFactory* factory, NginxConfig config)
+    : io_service_(io_service), acceptor_(io_service, tcp::endpoint(tcp::v4(), port)), factory_(factory), config_(config){
     start_accept();  // Begin accepting connections
 }
 
 // Start accepting incoming connections
 void server::start_accept() {
-    session* new_session = factory_->create(io_service_);  // Use factory to create a session
+    session* new_session = factory_->create(io_service_, config_);  // Use factory to create a session
     acceptor_.async_accept(new_session->socket(),
                            boost::bind(&server::handle_accept, this, new_session,
                                        boost::asio::placeholders::error));

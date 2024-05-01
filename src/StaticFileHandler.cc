@@ -21,7 +21,7 @@ void StaticFileHandler::handleRequest(const std::string& request_data) {
     std::istringstream line_stream(request_line);
     std::string method;
     line_stream >> method >> path_;
-    serveFile(root_path_ + path_.substr(7));
+    serveFile(root_path_);
 }
 
 void StaticFileHandler::serveFile(const std::string& path) {

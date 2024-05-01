@@ -1,5 +1,8 @@
 // An nginx config file parser.
 
+#ifndef CONFIG_PARSER_H
+#define CONFIG_PARSER_H
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -21,6 +24,8 @@ class NginxConfig {
   std::string ToString(int depth = 0);
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
   int GetPort() const;  // Add a method to get the port number
+  std::string GetHandlerType(const std::string& url_path) const;
+  std::string GetFilePath(const std::string& url_path) const;
 };
 
 // The driver that parses a config file and generates an NginxConfig.
@@ -57,3 +62,5 @@ class NginxConfigParser {
 
   TokenType ParseToken(std::istream* input, std::string* value);
 };
+
+#endif // CONFIG_PARSER_H

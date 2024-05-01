@@ -6,10 +6,11 @@
 #include "../include/EchoHandler.h"
 #include "../include/StaticFileHandler.h"
 #include "../include/RequestHandler.h"
+#include "../include/config_parser.h"
 using namespace boost::placeholders;
 
-session::session(boost::asio::io_service &io_service)
-    : socket_(io_service) {}
+session::session(boost::asio::io_service &io_service, NginxConfig config)
+    : socket_(io_service), config_(config) {}
 
 tcp::socket &session::socket()
 {
@@ -33,6 +34,19 @@ void session::parse_request() {
     line_stream >> path_; // "/echo", "/static/filename", etc.
 }
 
+std::string GetRemainingPath(const std::string& path) {
+    if (path.empty() || path[0] != '/') {
+        return ""; // Return an empty string for empty or invalid paths.
+    }
+    // Find the position of the second slash.
+    size_t second_slash_pos = path.find('/', 1);
+    if (second_slash_pos == std::string::npos) {
+        return ""; // Return an empty string if no second slash is found.
+    }
+
+    return path.substr(second_slash_pos); // Return the remaining substring after the first component.
+}
+
 void session::handle_read(const boost::system::error_code &error, size_t bytes_transferred)
 {
     if (!error)
@@ -48,13 +62,15 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
                 // We have the full request, including headers and body
                 parse_request();
                 std::ostringstream response_stream;
+                std::string type =config_.GetHandlerType(path_);
                 RequestHandler* handler;
-                if(path_.compare(0, 7, "/static") == 0)
+                if( type == "static")
                 {
-                    handler = new StaticFileHandler(socket_, "../files");  // Dynamically allocates memory for a StaticFileHandler object
+                    handler = new StaticFileHandler(socket_, config_.GetFilePath(path_)+
+                                                                             GetRemainingPath(path_));  // Dynamically allocates memory for a StaticFileHandler object
                 }
-                else{
-                    handler = new EchoHandler(socket_);
+                else if (type == "echo"){
+                   handler = new EchoHandler(socket_);
                 }
                 handler->handleRequest(request_data_);
             }

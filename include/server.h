@@ -3,13 +3,14 @@
 
 #include <boost/asio.hpp>
 #include "session.h"
-#include "ISessionFactory.h" 
+#include "ISessionFactory.h"
+#include "../include/config_parser.h"
 using boost::asio::ip::tcp;
 
 class server
 {
 public:
-    server(boost::asio::io_service &io_service, short port,ISessionFactory* factory);
+    server(boost::asio::io_service &io_service, short port,ISessionFactory* factory, NginxConfig config);
     // now its taking a file
     //  server(boost::asio::io_service& io_service, const std::string &config_file);
     void start_accept();
@@ -18,6 +19,7 @@ public:
     boost::asio::io_service &io_service_;
     tcp::acceptor acceptor_;
     ISessionFactory* factory_;
+    NginxConfig config_;
 };
 
 #endif

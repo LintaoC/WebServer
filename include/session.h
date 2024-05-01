@@ -4,12 +4,13 @@
 #include <boost/asio.hpp>
 #include <string>
 #include <fstream>
+#include "../include/config_parser.h"
 
 using boost::asio::ip::tcp;
 
 class session {
 public:
-    explicit session(boost::asio::io_service& io_service);
+    explicit session(boost::asio::io_service& io_service, NginxConfig config);
     tcp::socket& socket();
     virtual void start();
 
@@ -33,6 +34,7 @@ public:
     std::string path_;
     std::ifstream file_;
     std::vector<char> buffer_;
+    NginxConfig config_;
 };
 
 

@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
     boost::asio::io_service io_service;
     SessionFactory factory;
     try {
-        server s(io_service, port,&factory);
+        server s(io_service, port,&factory, config);
         io_service.run();
     } catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << "\n";
