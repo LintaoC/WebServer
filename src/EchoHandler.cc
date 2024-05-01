@@ -1,5 +1,6 @@
 #include "EchoHandler.h"
 #include <boost/bind/bind.hpp>
+#include <boost/log/trivial.hpp>
 
 using boost::asio::ip::tcp;
 

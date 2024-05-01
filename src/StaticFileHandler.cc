@@ -1,5 +1,6 @@
 #include "StaticFileHandler.h"
 #include <boost/bind/bind.hpp>
+#include <boost/log/trivial.hpp>
 #include <iostream>
 
 using boost::asio::ip::tcp;
@@ -27,10 +28,11 @@ void StaticFileHandler::handleRequest(const std::string& request_data) {
 void StaticFileHandler::serveFile(const std::string& path) {
     file_.open(path, std::ios::binary);
     if (!file_.is_open()) {
+        BOOST_LOG_TRIVIAL(error) << "Failed to open file: " << path;
         sendErrorResponse(404, "File Not Found");
         return;
     }
-
+    BOOST_LOG_TRIVIAL(info) << "Serving file: " << path;
     file_.seekg(0, std::ios::end);
     std::size_t file_size = file_.tellg();
     file_.seekg(0);

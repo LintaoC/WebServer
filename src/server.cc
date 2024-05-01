@@ -22,11 +22,12 @@ void server::start_accept() {
 
 // Handle the completion of an asynchronous accept operation
 void server::handle_accept(session* new_session, const boost::system::error_code& error) {
-    // BOOST_LOG_TRIVIAL(info) << "Accepted new connection";
+    BOOST_LOG_TRIVIAL(info) << "Accepted new connection";
     if (!error) {
         new_session->start();  // Start the session if there was no error
+        BOOST_LOG_TRIVIAL(info) << "Session started successfully";
     } else {
-        // BOOST_LOG_TRIVIAL(error) << "Error accepting connection: " << error.message();
+        BOOST_LOG_TRIVIAL(error) << "Error accepting connection: " << error.message();
         delete new_session;  // If there was an error, delete the session object to free resources
     }
     start_accept();  // Call start_accept again to accept next incoming connection

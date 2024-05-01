@@ -30,10 +30,8 @@ add_library(server_core
     src/EchoHandler.cc
     src/StaticFileHandler.cc
 )
-target_link_libraries(server_core Boost::system)
+target_link_libraries(server_core Boost::system Boost::log Boost::log_setup)
 #target_link_libraries(server_core echo_handler)
-
-
 
 # Main server executable
 add_executable(server src/server_main.cc)
@@ -42,17 +40,17 @@ target_link_libraries(server server_core config_parser Boost::log_setup Boost::l
 # Tests
 # Test for the config_parser
 add_executable(config_parser_test tests/config_parser_test.cc)
-target_link_libraries(config_parser_test config_parser gtest_main gtest gmock)
+target_link_libraries(config_parser_test config_parser gtest_main gtest gmock Boost::log Boost::log_setup)
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Server tests
 add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server_core  gtest_main gtest gmock)
+target_link_libraries(server_test server_core  gtest_main gtest gmock Boost::log Boost::log_setup)
 gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Session tests
 add_executable(session_test tests/session_test.cc)
-target_link_libraries(session_test server_core  gtest_main gtest gmock)
+target_link_libraries(session_test server_core  gtest_main gtest gmock Boost::log Boost::log_setup)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Coverage configuration

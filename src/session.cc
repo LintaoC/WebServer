@@ -3,6 +3,7 @@
 #include <sstream>
 #include <ctime>
 #include <iostream>
+#include <boost/log/trivial.hpp>
 #include "../include/EchoHandler.h"
 #include "../include/StaticFileHandler.h"
 #include "../include/RequestHandler.h"
@@ -32,6 +33,7 @@ void session::parse_request() {
     std::istringstream line_stream(request_line);
     line_stream >> method_; // GET, POST, etc.
     line_stream >> path_; // "/echo", "/static/filename", etc.
+    BOOST_LOG_TRIVIAL(info) << "Received request for " << path_ << " using method " << method_;
 }
 
 std::string GetRemainingPath(const std::string& path) {
@@ -52,6 +54,7 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
     if (!error)
     {
         request_data_.append(data_, bytes_transferred);
+        BOOST_LOG_TRIVIAL(info) << "Data read successfully: " << bytes_transferred << " bytes";
         auto headers_end = request_data_.find("\r\n\r\n");
         if (headers_end != std::string::npos)
         {
@@ -61,6 +64,7 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
             {
                 // We have the full request, including headers and body
                 parse_request();
+                BOOST_LOG_TRIVIAL(info) << "Request parsed: " << method_ << " " << path_;
                 std::ostringstream response_stream;
                 std::string type =config_.GetHandlerType(path_);
                 RequestHandler* handler;
@@ -95,6 +99,7 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
     else
     {
         std::cerr << "Read error: " << error.message() << "\n";
+        BOOST_LOG_TRIVIAL(error) << "Read error: " << error.message();
         delete this; // Properly handle the deletion of this session
     }
 }

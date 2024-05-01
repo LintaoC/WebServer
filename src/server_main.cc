@@ -62,6 +62,7 @@ void init_logging() {
     // Create a file logger
     logging::add_file_log(
         keywords::file_name = "server_log_%Y-%m-%d_%H-%M-%S.log",
+        keywords::auto_flush = true,
         keywords::rotation_size = 10 * 1024 * 1024,  // file rotation at 10 MB
         keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
         keywords::format = expr::stream
@@ -86,14 +87,14 @@ int main(int argc, char* argv[]) {
     NginxConfig config;
     if (!config_parser.Parse(argv[1], &config)) {
         std::cerr << "Failed to parse config file\n";
-        BOOST_LOG_TRIVIAL(info) << "Failed to parse config file";
+        BOOST_LOG_TRIVIAL(error) << "Failed to parse config file";
         return 1;
     }
 
     int port = config.GetPort();
     if (port == -1) {
         std::cerr << "Port number not found in the configuration file.\n";
-        BOOST_LOG_TRIVIAL(info) << "Port number not found in the configuration file.";
+        BOOST_LOG_TRIVIAL(error) << "Port number not found in the configuration file.";
         return 1;
     }
 
