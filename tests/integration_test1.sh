@@ -52,4 +52,3 @@ rm -f test_response1 test_response2 cleaned_response1 cleaned_response2
 rm -f server_log*
 exit $?
 
-

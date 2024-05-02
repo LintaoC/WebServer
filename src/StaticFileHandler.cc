@@ -5,7 +5,8 @@
 
 using boost::asio::ip::tcp;
 using namespace boost::placeholders;
-
+//1.correct input
+//2.file not found
 StaticFileHandler::StaticFileHandler(tcp::socket& socket, const std::string& root_path)
     : socket_(socket), root_path_(root_path) {}
 

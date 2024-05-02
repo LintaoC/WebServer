@@ -11,7 +11,7 @@ public:
     EchoHandler(boost::asio::ip::tcp::socket& socket);
     virtual void handleRequest(const std::string& request_data) override;
 
-private:
+
     virtual void handleWriteCompletion();
     boost::asio::ip::tcp::socket& socket_;
     std::string get_date();

@@ -23,6 +23,7 @@ include_directories(include)
 # Library for handling parsing configuration files
 add_library(config_parser src/config_parser.cc)
 add_library(echo_handler src/EchoHandler.cc)
+target_link_libraries(echo_handler Boost::system)
 # Library for core server functionality
 add_library(server_core
     src/server.cc
@@ -38,6 +39,11 @@ add_executable(server src/server_main.cc)
 target_link_libraries(server server_core config_parser Boost::log_setup Boost::log)
 
 # Tests
+# Echo Handler Test
+add_executable(EchoHandler_test tests/EchoHandler_test.cc)
+target_link_libraries(EchoHandler_test server_core gtest_main gtest gmock Boost::system)
+gtest_discover_tests(EchoHandler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
 # Test for the config_parser
 add_executable(config_parser_test tests/config_parser_test.cc)
 target_link_libraries(config_parser_test config_parser gtest_main gtest gmock Boost::log Boost::log_setup)
@@ -55,6 +61,6 @@ gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 
 # Coverage configuration
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server_core config_parser TESTS config_parser_test server_test session_test)
+generate_coverage_report(TARGETS server_core config_parser TESTS config_parser_test server_test session_test EchoHandler_test)
 
 add_test(NAME integration_test COMMAND bash ../tests/integration_tests.sh)

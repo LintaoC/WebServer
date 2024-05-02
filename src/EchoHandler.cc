@@ -22,7 +22,7 @@ void EchoHandler::handleRequest(const std::string& request_data) {
 
 void EchoHandler::handleWriteCompletion() {
     socket_.close();  // Close the socket after the response has been fully written
-    delete this;  // Delete the handler object
+    //delete this;  // Delete the handler object
 }
 
 std::string EchoHandler::get_date() {
