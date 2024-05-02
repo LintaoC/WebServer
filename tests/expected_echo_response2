@@ -1,0 +1,8 @@
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 65
+Date: Thu, 02 May 2024 06:36:59 GMT
+
+GET /echo1/a.txt HTTP/1.1
+Host: localhost
+Connection: close

@@ -12,22 +12,45 @@ echo "Server PID: $SERVER_PID"
 # Allow server some time to start
 sleep 1
 
-# Perform a test request and capture the response
-RESPONSE=$(echo -ne "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n" | nc localhost 8080)
-CLEANED_RESPONSE=$(echo "$RESPONSE" | sed '/^Date:/d')
+# Function to perform a test and compare responses
+perform_test() {
+    local request="$1"
+    local expected_file="$2"
+    local test_num="$3"
 
-# Normalize and save the actual response
-echo "$CLEANED_RESPONSE" | tr -d '\r \n' > test_response2
+    # Perform the test request and capture the response
+    RESPONSE=$(echo -ne "$request" | nc localhost 8080)
+    CLEANED_RESPONSE=$(echo "$RESPONSE" | sed '/^Date:/d')
 
-# Check the response
-echo -n "Test 2   "
-if diff --ignore-trailing-space "${RESPONSE_PATH}/expected_response2" "test_response2"; then
-    echo "success"
-else
-    echo "failed"
-fi
+    # Normalize and save the actual response
+    echo "$CLEANED_RESPONSE" | tr -d '\r\n ' > "test_response${test_num}"
 
-# Kill the server process and exit with the status of the diff command
+    # Clean and save the expected response
+    output_file="cleaned_response${test_num}"
+    cat "$expected_file" | sed '/^Date:/d' | tr -d '\r\n ' > "$output_file"
+
+    # Check the response
+    echo -n "Static File Test ${test_num}   "
+    if diff --ignore-trailing-space "$output_file" "test_response${test_num}"; then
+        echo "success"
+    else
+        echo "failed"
+    fi
+}
+
+# First test case
+perform_test "GET /static1/a.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" "${RESPONSE_PATH}/expected_static_response1" "1"
+
+# Second test case
+perform_test "GET /static/a.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" "${RESPONSE_PATH}/expected_static_response2" "2"
+
+# Third test case
+perform_test "GET /static/none.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" "${RESPONSE_PATH}/expected_static_response3" "3"
+
+# Kill the server process
 kill $SERVER_PID
-rm -f test_response2
+
+# Cleanup
+rm -f test_response1 test_response2 test_response3 cleaned_response1 cleaned_response2 cleaned_response3
+rm -f server_log*
 exit $?
