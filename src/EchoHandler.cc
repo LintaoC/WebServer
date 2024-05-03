@@ -7,6 +7,7 @@ using boost::asio::ip::tcp;
 EchoHandler::EchoHandler(tcp::socket& socket) : socket_(socket) {}
 
 void EchoHandler::handleRequest(const std::string& request_data) {
+    BOOST_LOG_TRIVIAL(debug) << "Echo request handling started";
     std::ostringstream response_stream;
     response_stream << "HTTP/1.1 200 OK\r\n"
                     << "Content-Type: text/plain\r\n"
@@ -21,6 +22,7 @@ void EchoHandler::handleRequest(const std::string& request_data) {
 }
 
 void EchoHandler::handleWriteCompletion() {
+    BOOST_LOG_TRIVIAL(info) << "Echo response sent and connection closing.";
     socket_.close();  // Close the socket after the response has been fully written
     delete this;  // Delete the handler object
 }

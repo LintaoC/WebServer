@@ -56,12 +56,14 @@ void StaticFileHandler::sendFileChunk() {
         boost::asio::async_write(socket_, boost::asio::buffer(buffer_.data(), bytes_read),
                                  boost::bind(&StaticFileHandler::sendFileChunk, this));
     } else {
+        BOOST_LOG_TRIVIAL(info) << "File transmission completed for: " << root_path_;
         socket_.close();  // Close the socket after the last chunk has been sent
         delete this;
     }
 }
 
 void StaticFileHandler::sendErrorResponse(int status_code, const std::string& message) {
+    BOOST_LOG_TRIVIAL(warning) << "Sending error response: " << status_code << " " << message;
     std::ostringstream response;
     response << "HTTP/1.1 " << status_code << " " << message << "\r\n";
     response << "Content-Type: text/html\r\n";
@@ -78,6 +80,7 @@ void StaticFileHandler::sendErrorResponse(int status_code, const std::string& me
 
 void StaticFileHandler::handleWriteCompletion(const boost::system::error_code& ec) {
     if (!ec) {
+        BOOST_LOG_TRIVIAL(info) << "Error response sent and connection closing.";
         socket_.close();  // Close the socket after the response has been fully written
     }
     delete this;  // Delete the handler object

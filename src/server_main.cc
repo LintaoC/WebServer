@@ -11,7 +11,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <boost/asio.hpp>
+#include <boost/asio/signal_set.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/log/attributes.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
@@ -52,23 +54,35 @@ void init_logging() {
     namespace keywords = logging::keywords;
     namespace sinks = logging::sinks;
     namespace expr = logging::expressions;
+    namespace attrs = logging::attributes;
+
+    // Add Thread ID to the logging attributes
+    logging::core::get()->add_global_attribute("ThreadID", attrs::current_thread_id());
 
     // Create a console logger
-    logging::add_console_log(std::cout, keywords::format = expr::stream
-        << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S")
-        << ": <" << logging::trivial::severity
-        << "> " << expr::smessage);
+    logging::add_console_log(
+        std::cout,
+        keywords::format = (
+            expr::stream
+            << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S")
+            << " [Thread " << expr::attr<attrs::current_thread_id::value_type>("ThreadID") << "]"
+            << ": <" << logging::trivial::severity << "> " << expr::smessage
+        )
+    );
 
     // Create a file logger
     logging::add_file_log(
-        keywords::file_name = "server_log_%Y-%m-%d_%H-%M-%S.log",
+        keywords::file_name = "../log/server_log_%Y-%m-%d_%H-%M-%S.log",
         keywords::auto_flush = true,
         keywords::rotation_size = 10 * 1024 * 1024,  // file rotation at 10 MB
         keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
-        keywords::format = expr::stream
+        keywords::format = (
+            expr::stream
             << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S")
-            << ": <" << logging::trivial::severity
-            << "> " << expr::smessage);
+            << " [Thread " << expr::attr<attrs::current_thread_id::value_type>("ThreadID") << "]"
+            << ": <" << logging::trivial::severity << "> " << expr::smessage
+        )
+    );
 
     // Add common attributes
     logging::add_common_attributes();
@@ -76,10 +90,12 @@ void init_logging() {
 
 int main(int argc, char* argv[]) {
     init_logging();
+    BOOST_LOG_TRIVIAL(trace) << "Initializing server logging";
     BOOST_LOG_TRIVIAL(info) << "Server starting up";
+
     if (argc != 2) {
         std::cerr << "Usage: server <config_file>\n";
-        BOOST_LOG_TRIVIAL(info) << "Usage: server <config_file>";
+        BOOST_LOG_TRIVIAL(error) << "Usage: server <config_file>";
         return 1;
     }
 
@@ -87,26 +103,37 @@ int main(int argc, char* argv[]) {
     NginxConfig config;
     if (!config_parser.Parse(argv[1], &config)) {
         std::cerr << "Failed to parse config file\n";
-        BOOST_LOG_TRIVIAL(error) << "Failed to parse config file";
+        BOOST_LOG_TRIVIAL(fatal) << "Failed to parse config file";
         return 1;
     }
 
     int port = config.GetPort();
     if (port == -1) {
         std::cerr << "Port number not found in the configuration file.\n";
-        BOOST_LOG_TRIVIAL(error) << "Port number not found in the configuration file.";
+        BOOST_LOG_TRIVIAL(fatal) << "Port number not found in the configuration file.";
         return 1;
     }
 
     boost::asio::io_service io_service;
     SessionFactory factory;
     try {
-        server s(io_service, port,&factory, config);
+        server s(io_service, port, &factory, config);
+        BOOST_LOG_TRIVIAL(debug) << "Server initialized successfully on port: " << port;
         io_service.run();
     } catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << "\n";
+        BOOST_LOG_TRIVIAL(fatal) << "Server initialization failed: " << e.what();
         return 1;
     }
 
+    boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
+    signals.async_wait(
+        [&](const boost::system::error_code& error, int signal_number) {
+            BOOST_LOG_TRIVIAL(info) << "Server terminating by signal: " << signal_number;
+            io_service.stop();
+        }
+    );
+
+    BOOST_LOG_TRIVIAL(info) << "Server shutdown successfully";
     return 0;
 }

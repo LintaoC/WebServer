@@ -15,6 +15,7 @@ server::server(boost::asio::io_service& io_service, short port, ISessionFactory*
 // Start accepting incoming connections
 void server::start_accept() {
     session* new_session = factory_->create(io_service_, config_);  // Use factory to create a session
+    BOOST_LOG_TRIVIAL(debug) << "Ready to accept new connection";
     acceptor_.async_accept(new_session->socket(),
                            boost::bind(&server::handle_accept, this, new_session,
                                        boost::asio::placeholders::error));

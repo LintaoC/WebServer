@@ -20,6 +20,9 @@ tcp::socket &session::socket()
 
 void session::start()
 {
+    auto endpoint = socket_.remote_endpoint();
+    BOOST_LOG_TRIVIAL(info) << "Connection from: " << endpoint.address().to_string() << ":" << endpoint.port();
+
     socket_.async_read_some(boost::asio::buffer(data_, max_length),
                             boost::bind(&session::handle_read, this,
                                         boost::asio::placeholders::error,
@@ -27,6 +30,7 @@ void session::start()
 }
 
 void session::parse_request() {
+    BOOST_LOG_TRIVIAL(trace) << "Parsing request: " << request_data_;
     std::istringstream request_stream(request_data_);
     std::string request_line;
     std::getline(request_stream, request_line); // Read the first line which contains the request details
@@ -54,7 +58,7 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
     if (!error)
     {
         request_data_.append(data_, bytes_transferred);
-        BOOST_LOG_TRIVIAL(info) << "Data read successfully: " << bytes_transferred << " bytes";
+        BOOST_LOG_TRIVIAL(debug) << "Data read successfully: " << bytes_transferred << " bytes";
         auto headers_end = request_data_.find("\r\n\r\n");
         if (headers_end != std::string::npos)
         {
@@ -99,7 +103,7 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
     else
     {
         std::cerr << "Read error: " << error.message() << "\n";
-        BOOST_LOG_TRIVIAL(error) << "Read error: " << error.message();
+        BOOST_LOG_TRIVIAL(fatal) << "Read error: " << error.message();
         delete this; // Properly handle the deletion of this session
     }
 }
