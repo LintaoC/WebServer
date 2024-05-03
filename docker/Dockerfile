@@ -20,6 +20,8 @@ FROM ubuntu:jammy as deploy
 # COPY --from=builder /usr/src/project/build/bin/example_server .
 COPY --from=builder /usr/src/project/build/bin/server .
 COPY --from=builder /usr/src/project/cloud_config .
+COPY --from=builder /usr/src/project/files/* ./files/
+COPY --from=builder /usr/src/project/files1/* ./files1/
 
 # Expose some port(s)
 EXPOSE 80
