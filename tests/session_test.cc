@@ -10,14 +10,14 @@ using ip::tcp;
 class MockSocket : public tcp::socket {
 public:
     explicit MockSocket(io_service& service) : tcp::socket(service) {}
-    MOCK_METHOD(tcp::endpoint, remote_endpoint, (), (const));
+    
 };
 
 class MockNginxConfig : public NginxConfig {
 public:
     //explicit MockSocket(io_service& service) : tcp::socket(service) {}
-    MOCK_METHOD(std::string, GetHandlerType, (const std::string&),(const));
-    MOCK_METHOD(std::string, GetFilePath, (const std::string&), (const));
+    MOCK_METHOD(std::string, GetHandlerType, (const std::string&),());
+    MOCK_METHOD(std::string, GetFilePath, (const std::string&), ());
 };
 
 // Mocking the session class

@@ -85,8 +85,11 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
                 else if (type == "echo"){
                     handler = new EchoHandler(socket_);
                 }
-
-                //handler->handleRequest(request_data_);
+                if(type!="")
+                {
+                    handler->handleRequest(request_data_);
+                } 
+                
           
                 
             }

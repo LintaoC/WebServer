@@ -56,7 +56,7 @@ gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/t
 
 # Session tests
 add_executable(session_test tests/session_test.cc)
-target_link_libraries(session_test server_core  gtest_main gtest gmock Boost::log Boost::log_setup)
+target_link_libraries(session_test server_core  config_parser gtest_main gtest gmock Boost::log Boost::log_setup)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Coverage configuration
