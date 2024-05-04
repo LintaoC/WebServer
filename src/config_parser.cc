@@ -68,18 +68,23 @@ std::string GetFirstPathComponent(const std::string& path) {
 }
 
 std::string NginxConfig::GetHandlerType(const std::string& url_path) const {
+    std::cerr<<"passing into GethandlerType"<<url_path<<std::endl;
     std::string first_component = GetFirstPathComponent(url_path); // Get the first component of the input path.
-
+    std::cerr<<"What is fir_state"<<first_component<<std::endl;
     for (const auto& statement : statements_) {
+        std::cerr<<"get into for loop"<<std::endl;
         if (!statement->tokens_.empty()) {
+            std::cerr<<"state_token is not empty"<<std::endl;
             std::string full_token = statement->tokens_[0];
             if(full_token == first_component){
                 return statement->tokens_[1];
             }
         }
-
+        std::cerr<<"state_token is empty"<<std::endl;
         if (statement->child_block_) {
+            std::cerr<<"get into child block"<<std::endl;
             std::string type = statement->child_block_->GetHandlerType(url_path);
+            std::cerr<<"what is type now"<<type<<std::endl;
             if (!type.empty()) {
                 return type;
             }

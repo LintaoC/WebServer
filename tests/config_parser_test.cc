@@ -159,3 +159,4 @@ TEST_F(NginxConfigParserTest, EofQuote)
   bool success = parser.Parse("EofQuote", &out_config);
   EXPECT_FALSE(success);
 }
+

@@ -51,7 +51,7 @@ gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE
 
 # Server tests
 add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server_core  gtest_main gtest gmock Boost::log Boost::log_setup)
+target_link_libraries(server_test server_core  config_parser gtest_main gtest gmock Boost::log Boost::log_setup)
 gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Session tests

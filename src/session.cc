@@ -20,13 +20,16 @@ tcp::socket &session::socket()
 
 void session::start()
 {
+    std::cerr<<"gointo start"<<std::endl;
     auto endpoint = socket_.remote_endpoint();
+    std::cerr<<"pass fetching socket"<<std::endl;
     BOOST_LOG_TRIVIAL(info) << "Connection from: " << endpoint.address().to_string() << ":" << endpoint.port();
-
+    std::cerr<<"passing boost function"<<std::endl;
     socket_.async_read_some(boost::asio::buffer(data_, max_length),
                             boost::bind(&session::handle_read, this,
                                         boost::asio::placeholders::error,
                                         boost::asio::placeholders::bytes_transferred));
+    std::cerr<<"not able to pass socket_ async read"<<std::endl;                                   
 }
 
 void session::parse_request() {
@@ -58,7 +61,7 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
     if (!error)
     {
         request_data_.append(data_, bytes_transferred);
-        BOOST_LOG_TRIVIAL(debug) << "Data read successfully: " << bytes_transferred << " bytes";
+        //BOOST_LOG_TRIVIAL(info) << "Data read successfully: " << bytes_transferred << " bytes";
         auto headers_end = request_data_.find("\r\n\r\n");
         if (headers_end != std::string::npos)
         {
@@ -70,34 +73,33 @@ void session::handle_read(const boost::system::error_code &error, size_t bytes_t
                 parse_request();
                 BOOST_LOG_TRIVIAL(info) << "Request parsed: " << method_ << " " << path_;
                 std::ostringstream response_stream;
+                std::cerr<<"The path  is"<<path_<<std::endl;
                 std::string type =config_.GetHandlerType(path_);
+                std::cerr<<"The type is"<<type<<std::endl;
                 RequestHandler* handler;
                 if( type == "static")
                 {
-                    handler = new StaticFileHandler(socket_, config_.GetFilePath(path_)+
-                                                                             GetRemainingPath(path_));  // Dynamically allocates memory for a StaticFileHandler object
+                     handler = new StaticFileHandler(socket_, config_.GetFilePath(path_)+
+                                                                            GetRemainingPath(path_));  // Dynamically allocates memory for a StaticFileHandler object
                 }
                 else if (type == "echo"){
-                   handler = new EchoHandler(socket_);
+                    handler = new EchoHandler(socket_);
                 }
-                handler->handleRequest(request_data_);
+
+                //handler->handleRequest(request_data_);
+          
+                
             }
             else
             {
                 // Continue reading more data
-                socket_.async_read_some(boost::asio::buffer(data_, max_length),
-                                        boost::bind(&session::handle_read, this,
-                                                    boost::asio::placeholders::error,
-                                                    boost::asio::placeholders::bytes_transferred));
+                socket_.async_read_some(boost::asio::buffer(data_, max_length),boost::bind(&session::handle_read, this,boost::asio::placeholders::error,boost::asio::placeholders::bytes_transferred));
             }
         }
         else
         {
             // Continue reading more data
-            socket_.async_read_some(boost::asio::buffer(data_, max_length),
-                                    boost::bind(&session::handle_read, this,
-                                                boost::asio::placeholders::error,
-                                                boost::asio::placeholders::bytes_transferred));
+            socket_.async_read_some(boost::asio::buffer(data_, max_length),boost::bind(&session::handle_read, this,boost::asio::placeholders::error,boost::asio::placeholders::bytes_transferred));
         }
     }
     else
@@ -118,21 +120,5 @@ size_t session::get_content_length(const std::string &request)
         return std::stoi(request.substr(start, end - start));
     }
     return 0;
-}
-
-std::string session::get_date()
-{
-    std::time_t now = std::time(0);
-    struct tm tm = *std::gmtime(&now);
-    char buf[30];
-    std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S %Z", &tm);
-    return std::string(buf);
-}
-
-void session::handle_write(const boost::system::error_code &error)
-{
-
-    delete this; // Close and delete session
-    
 }
 

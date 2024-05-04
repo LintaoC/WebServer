@@ -37,3 +37,7 @@ commnad:
 # Building container in google cloud
 command:
 `gcloud builds submit --config docker/cloudbuild.yaml .`
+
+# Command for checking test coverage rate
+`make coverage`
+`ctest --verbose`
