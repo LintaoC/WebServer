@@ -122,6 +122,23 @@ TEST_F(NginxConfigParserTest, GetPortNumberChildBlock)
   EXPECT_TRUE(same);
 }
 
+TEST_F(NginxConfigParserTest, GetHandlerTypeTest)
+{
+bool success = parser.Parse("example_config", &out_config);
+std::string a = "/static1/a.txt";
+std::string t = out_config.GetHandlerType(a);
+bool same = t == "static";
+EXPECT_TRUE(same);
+}
+
+TEST_F(NginxConfigParserTest, GetFilePathTest)
+{
+bool success = parser.Parse("example_config", &out_config);
+std::string a = "/static1/a.txt";
+std::string t = out_config.GetFilePath(a);
+bool same = t == "../files1";
+EXPECT_TRUE(same);
+}
 // tets when port is not found (return -1)
 TEST_F(NginxConfigParserTest, Nullport)
 {
