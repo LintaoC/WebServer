@@ -16,21 +16,20 @@ command:
 `sudo lsof -i :8080` 
 `sudo kill -9 PID` 
 
-# After start a server listen on port 8080:
-# Sending echo request to the server:
+# Run the program
+## After start a server listen on port 8080:
+### Sending echo request to the server:
 command:
 `echo -ne "GET /echo1/a.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" | nc localhost 8080`
-
-# Sending static file request to the server:
+### Sending static file request to the server:
 command:
 `echo -ne "GET /static/a.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" | nc localhost 8080`
 
-# Generate test coverage report:
-# build and go to build_coverage directory under f004
-# start compiling and generate test coverage report
-commnad:
+# Unit test / Coverage report
+## build and go to build_coverage directory under f004,
 `mkdir build_coverage`
 `cd build_coverage`
+## start compiling and generate test coverage report
 `cmake -DCMAKE_BUILD_TYPE=Coverage ..`
 `make coverage`
 
@@ -40,4 +39,9 @@ command:
 
 # Command for checking test coverage rate
 `make coverage`
-`ctest --verbose`
+`ctest --verbose` for debug using
+
+# Unit test
+
+
+# Intergration test
