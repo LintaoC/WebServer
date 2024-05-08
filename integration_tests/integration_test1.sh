@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CONFIG_FILE="../simple_config"
-RESPONSE_PATH="../tests"
+RESPONSE_PATH="../integration_tests/test_responses"
 SERVER_BIN="../build/bin/server"
 
 # Start the server in the background

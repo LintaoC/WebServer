@@ -70,4 +70,4 @@ include(cmake/CodeCoverageReportConfig.cmake)
 generate_coverage_report(TARGETS server_core config_parser TESTS config_parser_test server_test session_test EchoHandler_test StaticFileHandlerTest)
 
 # --- INTEGRATION TEST ---
-add_test(NAME integration_test COMMAND bash ../tests/integration_tests.sh)
+add_test(NAME integration_test COMMAND bash ../integration_tests/integration_tests.sh)
