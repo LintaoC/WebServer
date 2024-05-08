@@ -5,6 +5,7 @@ cmake-build-debug
 build
 build_*
 mirror
+log
 
 # Ignore build folders
 /CMakeFiles/
