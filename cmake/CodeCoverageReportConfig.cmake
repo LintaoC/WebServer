@@ -72,6 +72,7 @@ function(generate_coverage_report)
         --filter "${CMAKE_SOURCE_DIR}/src/config_parser.cc"
         --filter "${CMAKE_SOURCE_DIR}/src/server.cc"
         --filter "${CMAKE_SOURCE_DIR}/src/EchoHandler.cc"
+        --filter "${CMAKE_SOURCE_DIR}/src/StaticFileHandler.cc"
         --exclude "${CMAKE_SOURCE_DIR}/include"
         DEPENDS ${COVERAGE_DATA_STAMP_FILE}
         COMMENT "Generating coverage report"

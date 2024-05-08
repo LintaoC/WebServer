@@ -36,14 +36,9 @@ int NginxConfig::GetPort() const {
         if (statement->tokens_.size() > 1 && statement->tokens_[0] == "listen") {
             size_t colon_pos = statement->tokens_[1].find(':');
             std::string port_str = (colon_pos != std::string::npos) ? statement->tokens_[1].substr(colon_pos + 1) : statement->tokens_[1];
-            try {
-                int port = std::stoi(port_str);
-                return port;
-            } catch (const std::invalid_argument& e) {
-                std::cerr << "Invalid port number: " << port_str << std::endl;
-            } catch (const std::out_of_range& e) {
-                std::cerr << "Port number out of range: " << port_str << std::endl;
-            }
+            int port = std::stoi(port_str);
+            return port;
+            
         }
         // Recursively search in child blocks if present
         if (statement->child_block_) {

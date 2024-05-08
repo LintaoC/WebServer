@@ -11,7 +11,7 @@ public:
     virtual ~StaticFileHandler() override;
     void handleRequest(const std::string& request_data) override;
 
-private:
+
     boost::asio::ip::tcp::socket& socket_;
     std::string root_path_;
     std::ifstream file_;
@@ -20,6 +20,7 @@ private:
 
     void serveFile(const std::string& path);
     void sendFileChunk();
+    void deleteThis();
     void sendErrorResponse(int status_code, const std::string& message);
     std::string determineContentType(const std::string& path);
     bool endsWith(const std::string& value, const std::string& ending);

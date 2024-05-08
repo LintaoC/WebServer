@@ -48,20 +48,25 @@ void StaticFileHandler::serveFile(const std::string& path) {
 }
 
 void StaticFileHandler::sendFileChunk() {
+    std::cerr<<"test sendfile chunk, go into the sendfile chunk"<<std::endl;
     buffer_.resize(1024 * 64);
     file_.read(buffer_.data(), buffer_.size());
     std::size_t bytes_read = file_.gcount();
-
+    std::cerr<<" sendfile chunk,after file_count"<<std::endl;
     if (bytes_read > 0) {
+        
         boost::asio::async_write(socket_, boost::asio::buffer(buffer_.data(), bytes_read),
                                  boost::bind(&StaticFileHandler::sendFileChunk, this));
     } else {
+        std::cerr<<" what is bytes_read"<<bytes_read<<std::endl;
+        std::cerr<<" after reading bytes_read but not 0"<<std::endl;
         BOOST_LOG_TRIVIAL(info) << "File transmission completed for: " << root_path_;
         socket_.close();  // Close the socket after the last chunk has been sent
         delete this;
+        
     }
+    std::cerr<<"successfully read bytes read"<<std::endl;
 }
-
 void StaticFileHandler::sendErrorResponse(int status_code, const std::string& message) {
     BOOST_LOG_TRIVIAL(warning) << "Sending error response: " << status_code << " " << message;
     std::ostringstream response;

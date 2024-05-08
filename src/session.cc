@@ -20,16 +20,13 @@ tcp::socket &session::socket()
 
 void session::start()
 {
-    std::cerr<<"gointo start"<<std::endl;
     auto endpoint = socket_.remote_endpoint();
-    std::cerr<<"pass fetching socket"<<std::endl;
     BOOST_LOG_TRIVIAL(info) << "Connection from: " << endpoint.address().to_string() << ":" << endpoint.port();
-    std::cerr<<"passing boost function"<<std::endl;
     socket_.async_read_some(boost::asio::buffer(data_, max_length),
                             boost::bind(&session::handle_read, this,
                                         boost::asio::placeholders::error,
                                         boost::asio::placeholders::bytes_transferred));
-    std::cerr<<"not able to pass socket_ async read"<<std::endl;                                   
+                                     
 }
 
 void session::parse_request() {
