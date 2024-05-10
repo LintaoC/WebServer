@@ -1,0 +1,15 @@
+port 8080; # port my server listens on
+
+location /echo EchoHandler { # no arguments
+}
+
+location /static StaticHandler {
+  root ./files # supports relative paths
+}
+
+location /echo1 EchoHandler { # no arguments
+}
+
+location /static1 StaticHandler {
+  root ./files # supports relative paths
+}

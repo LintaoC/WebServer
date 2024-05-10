@@ -1,3 +1,3 @@
-server
+port
 {
     listen 8080;

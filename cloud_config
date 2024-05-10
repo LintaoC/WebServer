@@ -1,6 +1,6 @@
 server
 {
-    listen 80;
+    port 80;
     /static static ../files;
     /static1 static ../files1;
     /echo echo echo;

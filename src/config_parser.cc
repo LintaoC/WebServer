@@ -14,6 +14,8 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <boost/log/trivial.hpp>
+#include <boost/log/attributes.hpp>
 
 #include "../include/config_parser.h"
 
@@ -32,13 +34,15 @@ std::string NginxConfig::ToString(int depth)
 
 int NginxConfig::GetPort() const {
     for (const auto& statement : statements_) {
-        // Check if the statement is a 'listen' directive
-        if (statement->tokens_.size() > 1 && statement->tokens_[0] == "listen") {
-            size_t colon_pos = statement->tokens_[1].find(':');
-            std::string port_str = (colon_pos != std::string::npos) ? statement->tokens_[1].substr(colon_pos + 1) : statement->tokens_[1];
-            int port = std::stoi(port_str);
-            return port;
-            
+        // Check if the statement is a 'port'
+        if (statement->tokens_.size() > 1 && statement->tokens_[0] == "port") {
+            try {
+                return std::stoi(statement->tokens_[1]);
+            } catch (const std::invalid_argument &e) {
+                BOOST_LOG_TRIVIAL(error) <<"Invalid port value: " << statement->tokens_[1]
+                <<", using default 80 port."<< std::endl;
+                return 80;
+            }
         }
         // Recursively search in child blocks if present
         if (statement->child_block_) {
@@ -46,7 +50,8 @@ int NginxConfig::GetPort() const {
             if (port != -1) return port;
         }
     }
-    return -1; // Return -1 if no valid port is found
+    BOOST_LOG_TRIVIAL(error) <<"No port specified, using default 80 port."<< std::endl;
+    return 80; // Return default 80 if no valid port is found
 }
 
 std::string GetFirstPathComponent(const std::string& path) {

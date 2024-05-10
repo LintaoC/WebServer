@@ -139,12 +139,12 @@ TEST_F(NginxConfigParserTest, GetFilePathTest)
   bool same = t == "../files1";
   EXPECT_TRUE(same);
 }
-// tets when port is not found (return -1)
+// tets when port is not found (return 80)
 TEST_F(NginxConfigParserTest, Nullport)
 {
   bool success = parser.Parse("test_configs/empty_config", &out_config);
   int port = out_config.GetPort();
-  bool result = port == -1;
+  bool result = port == 80;
   EXPECT_TRUE(result);
 }
 
