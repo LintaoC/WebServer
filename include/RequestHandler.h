@@ -2,12 +2,15 @@
 #define REQUEST_HANDLER_H
 
 #include <string>
-#include <sstream>
+#include <boost/beast/http.hpp>
 
+// Abstract base class for all request handlers
 class RequestHandler {
 public:
     virtual ~RequestHandler() {}
-    virtual void handleRequest(const std::string& request_data) = 0;
+    // Pure virtual function to handle the request and produce a response
+    virtual boost::beast::http::response<boost::beast::http::string_body>
+    handle_request(const boost::beast::http::request<boost::beast::http::string_body>& req) = 0;
 };
 
 #endif // REQUEST_HANDLER_H

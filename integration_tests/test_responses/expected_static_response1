@@ -1,6 +1,5 @@
 HTTP/1.1 200 OK
 Content-Type: text/plain
 Content-Length: 21
-Connection: close
 
 it's a different file

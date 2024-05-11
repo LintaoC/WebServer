@@ -1,6 +1,5 @@
-HTTP/1.1 404 File Not Found
+HTTP/1.1 404 Not Found
 Content-Type: text/html
-Content-Length: 14
-Connection: close
+Content-Length: 51
 
-<html><body><h1>404 File Not Found</h1></body></html>
+<html><body><h1>404FileNotFound</h1></body></html>

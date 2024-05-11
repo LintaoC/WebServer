@@ -1,30 +1,29 @@
+// StaticFileHandler.h
 #ifndef STATIC_FILE_HANDLER_H
 #define STATIC_FILE_HANDLER_H
 
 #include "RequestHandler.h"
-#include <fstream>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
 #include <boost/asio.hpp>
+#include <string>
+#include <fstream>
 
 class StaticFileHandler : public RequestHandler {
 public:
-    StaticFileHandler(boost::asio::ip::tcp::socket& socket, const std::string& root_path);
-    virtual ~StaticFileHandler() override;
-    void handleRequest(const std::string& request_data) override;
+    StaticFileHandler(const std::string& root_path);
+    ~StaticFileHandler();
 
+    // Implementing the pure virtual function from RequestHandler
+    boost::beast::http::response<boost::beast::http::string_body>
+    handle_request(const boost::beast::http::request<boost::beast::http::string_body>& req) override;
 
-    boost::asio::ip::tcp::socket& socket_;
+private:
     std::string root_path_;
     std::ifstream file_;
-    std::string path_;
-    std::vector<char> buffer_;
 
-    void serveFile(const std::string& path);
-    void sendFileChunk();
-    void deleteThis();
-    void sendErrorResponse(int status_code, const std::string& message);
     std::string determineContentType(const std::string& path);
     bool endsWith(const std::string& value, const std::string& ending);
-    void handleWriteCompletion(const boost::system::error_code& ec);
 };
 
 #endif // STATIC_FILE_HANDLER_H

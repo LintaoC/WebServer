@@ -3,11 +3,13 @@
 
 #include "ISessionFactory.h"
 #include "../include/config_parser.h"
+#include "RequestHandlerFactory.h"
+#include <map>
 
 class SessionFactory : public ISessionFactory {
 public:
-    session* create(boost::asio::io_service& io_service, NginxConfig config) override {
-        return new session(io_service, config);  // Here we return a new session instance
+    session* create(boost::asio::io_service& io_service, std::map<std::string, RequestHandlerFactory*>* routes) override {
+        return new session(io_service, routes);  // Here we return a new session instance
     }
 };
 

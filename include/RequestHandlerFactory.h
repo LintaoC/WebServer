@@ -2,6 +2,7 @@
 #define REQUEST_HANDLER_FACTORY_H
 
 #include <string>
+#include "RequestHandler.h"
 
 class RequestHandlerFactory {
 private:
@@ -12,11 +13,12 @@ public:
     // Constructor with parameters for handler type and root path
     RequestHandlerFactory(const std::string& type, const std::string& path);
 
-    // Getters (optional, add if needed)
+    // Getters
     std::string getHandlerType() const;
     std::string getRootPath() const;
 
-    // Additional methods can be added here
+    RequestHandler* buildRequestHandler() const;
+
 };
 
 #endif // REQUEST_HANDLER_FACTORY_H

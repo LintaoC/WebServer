@@ -2,19 +2,15 @@
 #define ECHO_HANDLER_H
 
 #include "RequestHandler.h"
-#include <boost/asio.hpp>
-#include <sstream>
-#include <ctime>
 
+// EchoHandler class that echoes back the request
 class EchoHandler : public RequestHandler {
 public:
-    EchoHandler(boost::asio::ip::tcp::socket& socket);
-    virtual void handleRequest(const std::string& request_data) override;
-
-
-    virtual void handleWriteCompletion();
-    boost::asio::ip::tcp::socket& socket_;
-    std::string get_date();
+    EchoHandler();
+    ~EchoHandler();
+    // Overridden method to handle requests
+    boost::beast::http::response<boost::beast::http::string_body>
+    handle_request(const boost::beast::http::request<boost::beast::http::string_body>& req) override;
 };
 
-#endif 
+#endif // ECHO_HANDLER_H

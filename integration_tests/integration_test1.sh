@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONFIG_FILE="../simple_config"
+CONFIG_FILE="../config"
 RESPONSE_PATH="../integration_tests/test_responses"
 SERVER_BIN="../build/bin/server"
 

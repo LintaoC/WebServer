@@ -4,17 +4,19 @@
 #include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/bind/bind.hpp>
+#include "RequestHandlerFactory.h"
+#include <map>
 using namespace boost::placeholders;
 
 // Constructor for the 'server' class
-server::server(boost::asio::io_service& io_service, short port, ISessionFactory* factory, NginxConfig config)
-    : io_service_(io_service), acceptor_(io_service, tcp::endpoint(tcp::v4(), port)), factory_(factory), config_(config){
+server::server(boost::asio::io_service& io_service, short port, ISessionFactory* factory, std::map<std::string, RequestHandlerFactory*>* routes)
+    : io_service_(io_service), acceptor_(io_service, tcp::endpoint(tcp::v4(), port)), factory_(factory), routes_(routes){
     start_accept();  // Begin accepting connections
 }
 
 // Start accepting incoming connections
 void server::start_accept() {
-    session* new_session = factory_->create(io_service_, config_);  // Use factory to create a session
+    session* new_session = factory_->create(io_service_, routes_);  // Use factory to create a session
     BOOST_LOG_TRIVIAL(debug) << "Ready to accept new connection";
     acceptor_.async_accept(new_session->socket(),
                            boost::bind(&server::handle_accept, this, new_session,

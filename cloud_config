@@ -1,8 +1,15 @@
-server
-{
-    port 80;
-    /static static ../files;
-    /static1 static ../files1;
-    /echo echo echo;
-    /echo1 echo echo;
+port 80; # port my server listens on
+
+location /echo EchoHandler { # no arguments
+}
+
+location /static StaticHandler {
+  root ./files # supports relative paths
+}
+
+location /echo1 EchoHandler { # no arguments
+}
+
+location /static1 StaticHandler {
+  root ./files1 # supports relative paths
 }

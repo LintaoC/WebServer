@@ -116,13 +116,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::map<std::string, RequestHandlerFactory*>* map = config.getPathMap();
+    std::map<std::string, RequestHandlerFactory*>* routes = config.getPathMap();
 
 
     boost::asio::io_service io_service;
     SessionFactory factory;
     try {
-        server s(io_service, port, &factory, config);
+        server s(io_service, port, &factory, routes);
         BOOST_LOG_TRIVIAL(debug) << "Server initialized successfully on port: " << port;
         io_service.run();
     } catch (const std::exception& e) {

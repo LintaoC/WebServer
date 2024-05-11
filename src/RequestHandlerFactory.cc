@@ -1,6 +1,10 @@
 #include "RequestHandlerFactory.h"
 #include <boost/log/trivial.hpp>
 #include <boost/log/attributes.hpp>
+#include "EchoHandler.h"
+#include "RequestHandler.h"
+#include "StaticFileHandler.h"
+#include "NotFoundHandler.h"
 
 // Constructor implementation
 RequestHandlerFactory::RequestHandlerFactory(const std::string& type, const std::string& path)
@@ -19,5 +23,15 @@ std::string RequestHandlerFactory::getRootPath() const {
     return rootPath;
 }
 
+RequestHandler* RequestHandlerFactory::buildRequestHandler() const {
+    if (handlerType == "EchoHandler"){
+        return new EchoHandler();
+    } else if(handlerType == "StaticHandler"){
+        return new StaticFileHandler(rootPath);
+    } else {
+        return new NotFoundHandler();
+    }
+}
 
- //Additional method implementations can be added here
+
+
