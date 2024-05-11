@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
+#include "RequestHandlerFactory.h"
 
 class NginxConfig;
 
@@ -24,6 +26,8 @@ class NginxConfig {
   std::string ToString(int depth = 0);
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
   int GetPort() const;  // Add a method to get the port number
+  std::map<std::string, RequestHandlerFactory*>* getPathMap() const;
+  std::string getRootPath() const;
   std::string GetHandlerType(const std::string& url_path) const;
   std::string GetFilePath(const std::string& url_path) const;
 };

@@ -22,7 +22,9 @@
 #include <boost/log/support/date_time.hpp>
 #include "../include/server.h"
 #include "../include/config_parser.h"
-#include "../include/SessionFactory.h" 
+#include "../include/SessionFactory.h"
+#include "RequestHandlerFactory.h"
+#include <map>
 // int main(int argc, char *argv[])
 // {
 
@@ -113,6 +115,9 @@ int main(int argc, char* argv[]) {
         BOOST_LOG_TRIVIAL(fatal) << "Port number not found in the configuration file.";
         return 1;
     }
+
+    std::map<std::string, RequestHandlerFactory*>* map = config.getPathMap();
+
 
     boost::asio::io_service io_service;
     SessionFactory factory;

@@ -11,5 +11,5 @@ location /echo1 EchoHandler { # no arguments
 }
 
 location /static1 StaticHandler {
-  root ./files # supports relative paths
+  root ./files1 # supports relative paths
 }

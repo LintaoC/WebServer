@@ -21,16 +21,18 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 include_directories(include)
 
 # Library for handling parsing configuration files
-add_library(config_parser src/config_parser.cc)
+add_library(config_parser src/config_parser.cc src/RequestHandlerFactory.cc)
 add_library(echo_handler src/EchoHandler.cc)
 add_library(static_handler src/StaticFileHandler.cc)
+add_library(handler_factory src/RequestHandlerFactory.cc)
 target_link_libraries(echo_handler Boost::system)
 # Library for core server functionality
 add_library(server_core
-    src/server.cc
-    src/session.cc
-    src/EchoHandler.cc
-    src/StaticFileHandler.cc
+        src/server.cc
+        src/session.cc
+        src/EchoHandler.cc
+        src/StaticFileHandler.cc
+        src/RequestHandlerFactory.cc
 )
 target_link_libraries(server_core Boost::system Boost::log Boost::log_setup)
 #target_link_libraries(server_core echo_handler)

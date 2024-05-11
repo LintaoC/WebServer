@@ -14,9 +14,10 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <map>
 #include <boost/log/trivial.hpp>
 #include <boost/log/attributes.hpp>
-
+#include "RequestHandlerFactory.h"
 #include "../include/config_parser.h"
 
 // constructs a string representation of the entire configuration
@@ -31,6 +32,57 @@ std::string NginxConfig::ToString(int depth)
   }
   return serialized_config;
 }
+
+std::map<std::string, RequestHandlerFactory*>* NginxConfig::getPathMap() const {
+    auto* map = new std::map<std::string, RequestHandlerFactory*>; // Allocate map on the heap
+    for (const auto& statement : statements_) {
+        // Check if the statement is a 'location'
+        if (statement->tokens_.size() > 1 && statement->tokens_[0] == "location") {
+            try {
+                std::string url = statement->tokens_[1]; // Find url
+                std::string handlerType = statement->tokens_[2]; // Find type
+                std::string rootPath = "";
+                if (statement->child_block_) {
+                    rootPath = statement->child_block_->getRootPath(); // Find the root path from child block
+                }
+                RequestHandlerFactory* factory = new RequestHandlerFactory(handlerType, rootPath);
+                (*map)[url] = factory;
+
+            } catch (const std::invalid_argument &e) {
+                BOOST_LOG_TRIVIAL(error) << "Invalid port value: " << statement->tokens_[1]
+                                         << ", using default 80 port." << std::endl;
+            }
+        }
+        // Recursively search in child blocks if present
+        if (statement->child_block_) {
+            // We merge the child map into the parent map
+            std::map<std::string, RequestHandlerFactory*>* childMap = statement->child_block_->getPathMap();
+            map->insert(childMap->begin(), childMap->end());
+            delete childMap; // Clean up the child map to avoid memory leaks
+        }
+    }
+    return map; // Return the pointer to the map
+}
+
+std::string NginxConfig::getRootPath() const{
+    for (const auto& statement : statements_) {
+        // Check if the statement is a 'root'
+        if (statement->tokens_.size() > 1 && statement->tokens_[0] == "root") {
+            try {
+                return statement->tokens_[1]; // return the root path
+            } catch (const std::invalid_argument &e) {
+                return "";
+            }
+        }
+        // Recursively search in child blocks if present
+        if (statement->child_block_) {
+            std::string path = statement->child_block_->getRootPath();
+            return path;
+        }
+    }
+    return "";
+}
+
 
 int NginxConfig::GetPort() const {
     for (const auto& statement : statements_) {
@@ -53,6 +105,8 @@ int NginxConfig::GetPort() const {
     BOOST_LOG_TRIVIAL(error) <<"No port specified, using default 80 port."<< std::endl;
     return 80; // Return default 80 if no valid port is found
 }
+
+
 
 std::string GetFirstPathComponent(const std::string& path) {
     if (path.empty() || path[0] != '/') {
