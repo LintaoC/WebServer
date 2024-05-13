@@ -11,15 +11,12 @@
 #include <boost/beast/version.hpp>
 #include <boost/asio.hpp>
 using namespace boost::placeholders;
-
 session::session(boost::asio::io_service &io_service, std::map<std::string, RequestHandlerFactory*>* routes)
-    : socket_(io_service), routes_(routes) {}
-
+        : socket_(io_service), routes_(routes) {}
 tcp::socket &session::socket()
 {
     return socket_;
 }
-
 void session::start()
 {
     auto endpoint = socket_.remote_endpoint();
@@ -28,27 +25,22 @@ void session::start()
                             boost::bind(&session::handle_read, this,
                                         boost::asio::placeholders::error,
                                         boost::asio::placeholders::bytes_transferred));
-                                     
-}
 
+}
 void session::handle_read(const boost::system::error_code& ec, std::size_t bytes_transferred) {
     if (!ec) {
         BOOST_LOG_TRIVIAL(info)<<"Successfully read";
         // Assuming 'data_' is a suitable buffer where data from socket is read into.
         // Ensure 'data_' is declared, probably as a member of 'session'.
-
         // Prepare the multi_buffer for input
         boost::beast::multi_buffer buffer;
-
         // Write data into the multi_buffer
         // Here, we convert 'data_' which is probably a char array into a sequence that can be appended to the buffer
         std::size_t size = bytes_transferred; // The actual size of the data read
         buffer.commit(boost::asio::buffer_copy(buffer.prepare(size), boost::asio::buffer(data_, size)));
-
         // Create and use the parser
         boost::beast::http::request_parser<boost::beast::http::string_body> parser;
         parser.eager(true); // Optional: parse headers eagerly
-
         // Parse the HTTP request from the buffer
         boost::system::error_code parse_ec;
         parser.put(buffer.data(), parse_ec);
@@ -56,12 +48,11 @@ void session::handle_read(const boost::system::error_code& ec, std::size_t bytes
             BOOST_LOG_TRIVIAL(error) << "Parsing failed: " << parse_ec.message() << std::endl;
             return;
         }
-
         if (parser.is_done()) {
             // Complete parsing, extract the request
             auto req = parser.release();
             BOOST_LOG_TRIVIAL(info)<<"request parsed with method: "<<req.method()<<",   target: "<<req.target()<<
-            ",    version: "<<req.version()<<",     base: "<<req.base()<<",     body: "<<req.body();
+                                   ",    version: "<<req.version()<<",     base: "<<req.base()<<",     body: "<<req.body();
             RequestHandlerFactory* factory = getRequestHandlerFactory(std::string(req.target()), routes_);
             BOOST_LOG_TRIVIAL(info)<<"Factory class created with a factory of "<<factory->getHandlerType();
             RequestHandler* handler= factory->buildRequestHandler();
@@ -92,14 +83,11 @@ void session::handle_read(const boost::system::error_code& ec, std::size_t bytes
         delete this;
     }
 }
-
 RequestHandlerFactory* session::getRequestHandlerFactory(const std::string& path, std::map<std::string, RequestHandlerFactory*>* routes) {
     BOOST_LOG_TRIVIAL(info)<<"getRequestHandlerFactory received a path of "<<path;
-
     RequestHandlerFactory* longestMatchFactory = nullptr;
     size_t longestMatchLength = 0;
     std::string relativePath;  // To store the relative path to be set
-
     // Iterate over all routes to find the longest matching prefix
     for (const auto& route : *routes) {
         const std::string& prefix = route.first;
@@ -115,7 +103,6 @@ RequestHandlerFactory* session::getRequestHandlerFactory(const std::string& path
             }
         }
     }
-
     // If a match is found, set the relative path and return the factory
     if (longestMatchFactory) {
         if (!relativePath.empty() && relativePath[0] != '/') {
@@ -124,7 +111,6 @@ RequestHandlerFactory* session::getRequestHandlerFactory(const std::string& path
         longestMatchFactory->setRelativePath(relativePath);
         return longestMatchFactory;
     }
-
     // Return nullptr if no matching factory is found
     return nullptr;
 }

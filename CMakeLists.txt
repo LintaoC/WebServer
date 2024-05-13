@@ -33,6 +33,7 @@ add_library(server_core
         src/EchoHandler.cc
         src/StaticFileHandler.cc
         src/RequestHandlerFactory.cc
+        src/NotFoundHandler.cc
 )
 target_link_libraries(server_core Boost::system Boost::log Boost::log_setup)
 #target_link_libraries(server_core echo_handler)
@@ -42,10 +43,20 @@ add_executable(server src/server_main.cc)
 target_link_libraries(server server_core config_parser Boost::log_setup Boost::log)
 
 # --- UNIT TEST ---
+# Handler Factory Test
+add_executable(RequestHandlerFactoryTest tests/RequestHandlerFactoryTest.cc)
+target_link_libraries(RequestHandlerFactoryTest server_core gtest_main gtest gmock Boost::system)
+gtest_discover_tests(RequestHandlerFactoryTest WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
 # Echo Handler Test
 add_executable(EchoHandler_test tests/EchoHandler_test.cc)
 target_link_libraries(EchoHandler_test server_core gtest_main gtest gmock Boost::system)
 gtest_discover_tests(EchoHandler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
+# Not Found Handler Test
+add_executable(NotFoundHandler_test tests/NotFoundHandlerTest.cc)
+target_link_libraries(NotFoundHandler_test server_core gtest_main gtest gmock Boost::system)
+gtest_discover_tests(NotFoundHandler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Static Handler Test
 add_executable(StaticFileHandlerTest tests/static_file_handler_test.cc)
@@ -69,7 +80,8 @@ gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 
 # Coverage configuration
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server_core config_parser TESTS config_parser_test server_test session_test EchoHandler_test StaticFileHandlerTest)
+generate_coverage_report(TARGETS server_core config_parser TESTS config_parser_test server_test session_test
+        EchoHandler_test StaticFileHandlerTest RequestHandlerFactoryTest NotFoundHandler_test)
 
 # --- INTEGRATION TEST ---
 add_test(NAME integration_test COMMAND bash ../integration_tests/integration_tests.sh)
