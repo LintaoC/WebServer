@@ -14,16 +14,20 @@ server::server(boost::asio::io_service& io_service, short port, ISessionFactory*
     start_accept();  // Begin accepting connections
 }
 
-// Start accepting incoming connections
+// In server::start_accept
 void server::start_accept() {
     session* new_session = factory_->create(io_service_, routes_);  // Use factory to create a session
+    if (!new_session) {
+        BOOST_LOG_TRIVIAL(error) << "Failed to create new session";
+        return;
+    }
     BOOST_LOG_TRIVIAL(debug) << "Ready to accept new connection";
     acceptor_.async_accept(new_session->socket(),
                            boost::bind(&server::handle_accept, this, new_session,
                                        boost::asio::placeholders::error));
 }
 
-// Handle the completion of an asynchronous accept operation
+// In server::handle_accept
 void server::handle_accept(session* new_session, const boost::system::error_code& error) {
     BOOST_LOG_TRIVIAL(info) << "Accepted new connection";
     if (!error) {
