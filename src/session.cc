@@ -94,22 +94,39 @@ void session::handle_read(const boost::system::error_code& ec, std::size_t bytes
 }
 
 RequestHandlerFactory* session::getRequestHandlerFactory(const std::string& path, std::map<std::string, RequestHandlerFactory*>* routes) {
-    RequestHandlerFactory* factory =new RequestHandlerFactory("","");
-    if (!routes) {
-        return factory;  // Safety check to ensure the map pointer is valid
+    BOOST_LOG_TRIVIAL(info)<<"getRequestHandlerFactory received a path of "<<path;
+
+    RequestHandlerFactory* longestMatchFactory = nullptr;
+    size_t longestMatchLength = 0;
+    std::string relativePath;  // To store the relative path to be set
+
+    // Iterate over all routes to find the longest matching prefix
+    for (const auto& route : *routes) {
+        const std::string& prefix = route.first;
+        // Check for matching prefix that also ensures the match respects path boundaries
+        if (path.length() >= prefix.length() && path.compare(0, prefix.length(), prefix) == 0) {
+            if (path.length() == prefix.length() || path[prefix.length()] == '/') {
+                if (prefix.length() > longestMatchLength) {
+                    longestMatchFactory = route.second;
+                    longestMatchLength = prefix.length();
+                    // Extract the relative path part
+                    relativePath = path.substr(prefix.length());
+                }
+            }
+        }
     }
 
-    // Find the first '/' after the initial one (assuming path starts with '/')
-    size_t second_slash_pos = path.find('/', 1);
-    std::string key = path.substr(0, second_slash_pos);
-
-    // Find the factory in the map
-    auto it = routes->find(key);
-    if (it != routes->end()) {
-        return it->second;  // Return the corresponding RequestHandlerFactory
+    // If a match is found, set the relative path and return the factory
+    if (longestMatchFactory) {
+        if (!relativePath.empty() && relativePath[0] != '/') {
+            relativePath = '/' + relativePath;  // Ensure leading '/' for relative path
+        }
+        longestMatchFactory->setRelativePath(relativePath);
+        return longestMatchFactory;
     }
 
-    return factory;  // Return nullptr if no matching factory is found
+    // Return nullptr if no matching factory is found
+    return nullptr;
 }
 
 

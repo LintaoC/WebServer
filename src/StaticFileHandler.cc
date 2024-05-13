@@ -3,8 +3,8 @@
 #include <sstream>
 #include <iterator>
 
-StaticFileHandler::StaticFileHandler(const std::string& root_path)
-        : root_path_(root_path) {}
+StaticFileHandler::StaticFileHandler(const std::string& root_path, const std::string& relative_path)
+        : root_path_(root_path), relative_path_(relative_path) {}
 
 StaticFileHandler::~StaticFileHandler() {
     if (file_.is_open()) {
@@ -14,14 +14,11 @@ StaticFileHandler::~StaticFileHandler() {
 
 boost::beast::http::response<boost::beast::http::string_body>
 StaticFileHandler::handle_request(const boost::beast::http::request<boost::beast::http::string_body>& req) {
-    // Extract only the filename from the request target after the second '/'
-    std::string request_target = req.target().to_string();
-    std::size_t second_slash_pos = request_target.find('/', 1); // Find the first '/' after the leading '/'
-    std::string filename = request_target.substr(second_slash_pos + 1);
-    BOOST_LOG_TRIVIAL(info) << "The file path is: " << filename;
+
+    BOOST_LOG_TRIVIAL(info) << "The relative path is: " << relative_path_;
 
     // Full path to the file
-    std::string full_path = "../" + root_path_ + "/" + filename;
+    std::string full_path = "../" + root_path_ + relative_path_;
     BOOST_LOG_TRIVIAL(info) << "The local path is: " << full_path;
     file_.open(full_path, std::ios::binary);
 

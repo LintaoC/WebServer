@@ -8,6 +8,7 @@ class RequestHandlerFactory {
 private:
     std::string handlerType;
     std::string rootPath;
+    std::string relativePath;
 
 public:
     // Constructor with parameters for handler type and root path
@@ -16,6 +17,8 @@ public:
     // Getters
     std::string getHandlerType() const;
     std::string getRootPath() const;
+    std::string getRelativePath() const;
+    void setRelativePath(std::string rp);
 
     RequestHandler* buildRequestHandler() const;
 

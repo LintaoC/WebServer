@@ -11,7 +11,7 @@
 
 class StaticFileHandler : public RequestHandler {
 public:
-    StaticFileHandler(const std::string& root_path);
+    StaticFileHandler(const std::string& root_path, const std::string& relative_path);
     ~StaticFileHandler();
 
     // Implementing the pure virtual function from RequestHandler
@@ -20,6 +20,7 @@ public:
 
 private:
     std::string root_path_;
+    std::string relative_path_;
     std::ifstream file_;
 
     std::string determineContentType(const std::string& path);
