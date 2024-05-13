@@ -14,7 +14,7 @@ using boost::asio::ip::tcp;
 class session {
 public:
     explicit session(boost::asio::io_service& io_service, std::map<std::string, RequestHandlerFactory*>* routes);
-    tcp::socket& socket();
+    tcp::socket& socket(); 
     virtual void start();
     
 

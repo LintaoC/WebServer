@@ -20,7 +20,7 @@ public:
     std::string getRelativePath() const;
     void setRelativePath(std::string rp);
 
-    RequestHandler* buildRequestHandler() const;
+    virtual RequestHandler* buildRequestHandler() const;
 
 };
 
