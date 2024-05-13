@@ -19,6 +19,8 @@
 #include <boost/log/attributes.hpp>
 #include "RequestHandlerFactory.h"
 #include "../include/config_parser.h"
+#include <stdexcept>
+#include <algorithm>
 
 // constructs a string representation of the entire configuration
 // It recursively calls ToString on each NginxConfigStatement within its statements_ vector,
@@ -40,17 +42,34 @@ std::map<std::string, RequestHandlerFactory*>* NginxConfig::getPathMap() const {
         if (statement->tokens_.size() > 1 && statement->tokens_[0] == "location") {
             try {
                 std::string url = statement->tokens_[1]; // Find url
+
+                // Ensure the URL starts with a '/'
+                if (!url.empty() &&  url[0] != '/') {
+                    url = '/' + url;
+                }
+
+                // Trim trailing slashes, but ensure not to remove the initial '/' for root paths
+                while (url.size() > 1 && url.back() == '/') {
+                    url.pop_back();
+                }
+
+                if (map->find(url) != map->end()) {
+                    // If the URL already exists in the map, throw an exception indicating a configuration error
+                    throw std::runtime_error("Duplicate location found in configuration: " + url);
+                }
+
                 std::string handlerType = statement->tokens_[2]; // Find type
                 std::string rootPath = "";
                 if (statement->child_block_) {
                     rootPath = statement->child_block_->getRootPath(); // Find the root path from child block
+                    while (!rootPath.empty() && rootPath.back() == '/') {
+                        rootPath.pop_back();
+                    }
                 }
                 RequestHandlerFactory* factory = new RequestHandlerFactory(handlerType, rootPath);
                 (*map)[url] = factory;
 
             } catch (const std::invalid_argument &e) {
-                BOOST_LOG_TRIVIAL(error) << "Invalid port value: " << statement->tokens_[1]
-                                         << ", using default 80 port." << std::endl;
             }
         }
         // Recursively search in child blocks if present
@@ -68,16 +87,7 @@ std::string NginxConfig::getRootPath() const{
     for (const auto& statement : statements_) {
         // Check if the statement is a 'root'
         if (statement->tokens_.size() > 1 && statement->tokens_[0] == "root") {
-            try {
-                return statement->tokens_[1]; // return the root path
-            } catch (const std::invalid_argument &e) {
-                return "";
-            }
-        }
-        // Recursively search in child blocks if present
-        if (statement->child_block_) {
-            std::string path = statement->child_block_->getRootPath();
-            return path;
+            return statement->tokens_[1]; // return the root path
         }
     }
     return "";
@@ -105,72 +115,6 @@ int NginxConfig::GetPort() const {
     BOOST_LOG_TRIVIAL(error) <<"No port specified, using default 80 port."<< std::endl;
     return 80; // Return default 80 if no valid port is found
 }
-
-
-
-std::string GetFirstPathComponent(const std::string& path) {
-    if (path.empty() || path[0] != '/') {
-        return ""; // Return an empty string for empty or invalid paths.
-    }
-    // Find the position of the second slash.
-    size_t second_slash_pos = path.find('/', 1);
-    if (second_slash_pos == std::string::npos) {
-        return path; // Return the entire path if no second slash is found.
-    }
-
-    return path.substr(0, second_slash_pos); // Return the substring up to the second slash.
-}
-
-std::string NginxConfig::GetHandlerType(const std::string& url_path) const {
-    std::cerr<<"passing into GethandlerType"<<url_path<<std::endl;
-    std::string first_component = GetFirstPathComponent(url_path); // Get the first component of the input path.
-    std::cerr<<"What is fir_state"<<first_component<<std::endl;
-    for (const auto& statement : statements_) {
-        std::cerr<<"get into for loop"<<std::endl;
-        if (!statement->tokens_.empty()) {
-            std::cerr<<"state_token is not empty"<<std::endl;
-            std::string full_token = statement->tokens_[0];
-            if(full_token == first_component){
-                return statement->tokens_[1];
-            }
-        }
-        std::cerr<<"state_token is empty"<<std::endl;
-        if (statement->child_block_) {
-            std::cerr<<"get into child block"<<std::endl;
-            std::string type = statement->child_block_->GetHandlerType(url_path);
-            std::cerr<<"what is type now"<<type<<std::endl;
-            if (!type.empty()) {
-                return type;
-            }
-        }
-    }
-
-    return ""; // Return an empty string if no valid handler is found.
-}
-
-std::string NginxConfig::GetFilePath(const std::string& url_path) const {
-    std::string first_component = GetFirstPathComponent(url_path); // Get the first component.
-
-    for (const auto& statement : statements_) {
-        if (!statement->tokens_.empty()) {
-            std::string full_token = statement->tokens_[0];
-
-            if(full_token == first_component){
-                return statement->tokens_[2];
-            }
-        }
-
-        if (statement->child_block_) {
-            std::string file_path = statement->child_block_->GetFilePath(url_path);
-            if (!file_path.empty()) {
-                return file_path;
-            }
-        }
-    }
-
-    return ""; // Return an empty string if no valid path is found.
-}
-
 
 
 // Generates a string for a single configuration statement.

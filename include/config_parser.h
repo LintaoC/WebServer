@@ -28,8 +28,6 @@ class NginxConfig {
   int GetPort() const;  // Add a method to get the port number
   std::map<std::string, RequestHandlerFactory*>* getPathMap() const;
   std::string getRootPath() const;
-  std::string GetHandlerType(const std::string& url_path) const;
-  std::string GetFilePath(const std::string& url_path) const;
 };
 
 // The driver that parses a config file and generates an NginxConfig.

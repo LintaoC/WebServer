@@ -17,3 +17,6 @@ location /static1 StaticHandler {
 location /static/static StaticHandler {
   root ./files1 # supports relative paths
 }
+
+location / EchoHandler {
+}

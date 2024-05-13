@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include "config_parser.h"
+#include <map>
+#include "RequestHandlerFactory.h"
 
 class NginxConfigParserTest : public ::testing::Test
 {
@@ -122,23 +124,6 @@ TEST_F(NginxConfigParserTest, GetPortNumberChildBlock)
   EXPECT_TRUE(same);
 }
 
-TEST_F(NginxConfigParserTest, GetHandlerTypeTest)
-{
-  bool success = parser.Parse("test_configs/example_config", &out_config);
-  std::string a = "/static1/a.txt";
-  std::string t = out_config.GetHandlerType(a);
-  bool same = t == "static";
-  EXPECT_TRUE(same);
-}
-
-TEST_F(NginxConfigParserTest, GetFilePathTest)
-{
-  bool success = parser.Parse("test_configs/example_config", &out_config);
-  std::string a = "/static1/a.txt";
-  std::string t = out_config.GetFilePath(a);
-  bool same = t == "../files1";
-  EXPECT_TRUE(same);
-}
 // tets when port is not found (return 80)
 TEST_F(NginxConfigParserTest, Nullport)
 {
@@ -146,6 +131,26 @@ TEST_F(NginxConfigParserTest, Nullport)
   int port = out_config.GetPort();
   bool result = port == 80;
   EXPECT_TRUE(result);
+}
+
+TEST_F(NginxConfigParserTest, Stringport)
+{
+bool success = parser.Parse("test_configs/string_port", &out_config);
+int port = out_config.GetPort();
+bool result = port == 80;
+EXPECT_TRUE(result);
+}
+
+TEST_F(NginxConfigParserTest, TestGetPathMap)
+{
+bool success = parser.Parse("test_configs/test_config", &out_config);
+std::map<std::string, RequestHandlerFactory*>* map = out_config.getPathMap();
+RequestHandlerFactory* factory = (*map) ["/static"];
+std::string handlerType = factory->getHandlerType();
+std::string path = factory->getRootPath();
+EXPECT_TRUE(handlerType == "StaticHandler");
+EXPECT_TRUE(path == "./files");
+delete map;
 }
 
 TEST_F(NginxConfigParserTest, SingleQuote)
