@@ -44,11 +44,13 @@ perform_test "GET /echo/a.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r
 # Second test case
 perform_test "GET /echo1/a.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" "${RESPONSE_PATH}/expected_echo_response2" "2"
 
+perform_test "GET /none/a.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" "${RESPONSE_PATH}/expected_404_response" "3"
+
 # Kill the server process
 kill $SERVER_PID
 
 # Cleanup
-rm -f test_response1 test_response2 cleaned_response1 cleaned_response2
+rm -f test_response1 test_response2 test_response3 cleaned_response1 cleaned_response2 cleaned_response3
 rm -f server_log*
 exit $?
 

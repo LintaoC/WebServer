@@ -85,9 +85,9 @@ void session::handle_read(const boost::system::error_code& ec, std::size_t bytes
 }
 RequestHandlerFactory* session::getRequestHandlerFactory(const std::string& path, std::map<std::string, RequestHandlerFactory*>* routes) {
     BOOST_LOG_TRIVIAL(info)<<"getRequestHandlerFactory received a path of "<<path;
-    RequestHandlerFactory* longestMatchFactory = nullptr;
+    RequestHandlerFactory* longestMatchFactory;
     size_t longestMatchLength = 0;
-    std::string relativePath;  // To store the relative path to be set
+    std::string relativePath ="";  // To store the relative path to be set
     // Iterate over all routes to find the longest matching prefix
     for (const auto& route : *routes) {
         const std::string& prefix = route.first;
@@ -104,15 +104,14 @@ RequestHandlerFactory* session::getRequestHandlerFactory(const std::string& path
         }
     }
     // If a match is found, set the relative path and return the factory
-    if (longestMatchFactory) {
+    if ((longestMatchFactory && longestMatchLength >1) || path.length() == 1) {
         if (!relativePath.empty() && relativePath[0] != '/') {
             relativePath = '/' + relativePath;  // Ensure leading '/' for relative path
         }
         longestMatchFactory->setRelativePath(relativePath);
         return longestMatchFactory;
     }
-    // Return nullptr if no matching factory is found
-    return nullptr;
+    return new RequestHandlerFactory("","");
 }
 
 

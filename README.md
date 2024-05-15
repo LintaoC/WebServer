@@ -38,13 +38,12 @@ Accepts incoming connections and use factory to create `session` instances.
 Manages individual client connections, reads requests, and delegates them to appropriate request handlers.\
 Uses `RequestHandlerFactory` to obtain the appropriate request handler for each request.
 
-# Build & Run
 
 ## Start Docker
 
 `tools/env/start.sh -u ${USER}` 
 
-## Run Docker
+## Run Docker and map corresponding port to local
 `docker build -f docker/base.Dockerfile -t f004:base .`\
 `docker build -f docker/Dockerfile -t my_image .`\
 `docker run --rm -p 8080:8080 --name my_run my_image:latest`
@@ -218,7 +217,12 @@ EchoHandler::handle_request(const boost::beast::http::request<boost::beast::http
 }
 ```
 
-## Well-documented header file
+### 5. Update CMakeLists coverage.Dockerfile
+
+Add the file to server core
+Add executable to the unit tests
+Add the file to coverage.Dockerfile
+
 
 EchoHandler.h
 
