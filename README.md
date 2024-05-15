@@ -39,6 +39,8 @@ Manages individual client connections, reads requests, and delegates them to app
 Uses `RequestHandlerFactory` to obtain the appropriate request handler for each request.
 
 
+# Build, Test, and Run the Code
+
 ## Start Docker
 
 `tools/env/start.sh -u ${USER}` 
@@ -78,8 +80,26 @@ Uses `RequestHandlerFactory` to obtain the appropriate request handler for each 
 
 `echo -ne "GET /static/a.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" | nc localhost 8080`
 
+#### For files that cannot be checked by echo
 
-# Test
+`curl -v http://localhost:8080/static/b.png -O`\
+or name it with output\
+`curl -o output.png "http://localhost:8080/static/b.png"`
+
+`b.png` can be replaced with `a.txt`, `c.html`, `d.zip`, `e.html`
+
+The response file should be saved in the current directory
+
+### Running with Google Cloud container:
+
+#### Replace `localhost` with `34.145.59.128`, and `8080` with `80`
+
+For example, to check with echo:\
+`echo -ne "GET /static/a.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" | nc 34.145.59.128 80`
+
+To check with curl:\
+`curl -v http://34.145.59.128:80/static/d.zip -O`
+
 
 ## Unit test, Intergration test & Coverage report
 
@@ -100,9 +120,10 @@ Uses `RequestHandlerFactory` to obtain the appropriate request handler for each 
 `cd integration_tests`\
 `./integration_tests.sh`
 
-# Building Container in Google Cloud
+## Building Container in Google Cloud
 
 `gcloud builds submit --config docker/cloudbuild.yaml .`
+
 
 # Adding a Request Handler
 
@@ -173,6 +194,12 @@ location /example ExampleHandler {
 
 ### 4. Update header files wherever needed
 
+### 5. Update CMakeLists coverage.Dockerfile
+
+Add the file to server core\
+Add executable to the unit tests\
+Add the file to coverage.Dockerfile
+
 ## Well-documented example of an existing handler
 
 EchoHandler.cc
@@ -217,12 +244,7 @@ EchoHandler::handle_request(const boost::beast::http::request<boost::beast::http
 }
 ```
 
-### 5. Update CMakeLists coverage.Dockerfile
-
-Add the file to server core
-Add executable to the unit tests
-Add the file to coverage.Dockerfile
-
+## Well-documented header file
 
 EchoHandler.h
 
