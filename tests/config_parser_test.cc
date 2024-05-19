@@ -143,14 +143,19 @@ EXPECT_TRUE(result);
 
 TEST_F(NginxConfigParserTest, TestGetPathMap)
 {
-bool success = parser.Parse("test_configs/test_config", &out_config);
-std::map<std::string, RequestHandlerFactory*>* map = out_config.getPathMap();
-RequestHandlerFactory* factory = (*map) ["/static"];
-std::string handlerType = factory->getHandlerType();
-std::string path = factory->getRootPath();
-EXPECT_TRUE(handlerType == "StaticHandler");
-EXPECT_TRUE(path == "./files");
-delete map;
+    bool success = parser.Parse("test_configs/test_config", &out_config);
+    std::map<std::string, RequestHandlerFactory *> *map = out_config.getPathMap();
+    RequestHandlerFactory *factory = (*map)["/static"];
+
+    std::string handlerType = factory->getHandlerType();
+    EXPECT_TRUE(handlerType == "StaticHandler");
+
+    auto handler_params = factory->getHandlerParams();
+    EXPECT_EQ(handler_params.size(), 1);
+    std::string path = handler_params["root"];
+    EXPECT_TRUE(path == "./files");
+
+    delete map;
 }
 
 TEST_F(NginxConfigParserTest, SingleQuote)

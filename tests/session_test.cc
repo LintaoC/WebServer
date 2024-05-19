@@ -27,7 +27,7 @@ public:
 
 class EchoRequestHandlerFactory : public RequestHandlerFactory {
 public:
-    EchoRequestHandlerFactory() : RequestHandlerFactory("EchoHandler", "/echo") {}
+    EchoRequestHandlerFactory() : RequestHandlerFactory("EchoHandler", {{"root", "/echo"}}) {}
     RequestHandler* buildRequestHandler() const override {
         return new EchoRequestHandler();
     }
@@ -151,6 +151,6 @@ int main(int argc, char **argv) {
     // Initialize Boost.Log
     boost::log::add_common_attributes();
     boost::log::add_console_log(std::cout, boost::log::keywords::format = "%TimeStamp% [%Severity%]: %Message%");
-    
+
     return RUN_ALL_TESTS();
 }

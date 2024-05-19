@@ -111,7 +111,7 @@ RequestHandlerFactory* session::getRequestHandlerFactory(const std::string& path
         longestMatchFactory->setRelativePath(relativePath);
         return longestMatchFactory;
     }
-    return new RequestHandlerFactory("","");
+    return new RequestHandlerFactory("", {});
 }
 
 

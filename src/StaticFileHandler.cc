@@ -3,8 +3,8 @@
 #include <sstream>
 #include <iterator>
 
-StaticFileHandler::StaticFileHandler(const std::string& root_path, const std::string& relative_path)
-        : root_path_(root_path), relative_path_(relative_path) {}
+StaticFileHandler::StaticFileHandler(const std::map<std::string, std::string> &params)
+        : root_path_(params.at("root")), relative_path_(params.at("relative_path")) {}
 
 StaticFileHandler::~StaticFileHandler() {
     if (file_.is_open()) {
@@ -13,7 +13,7 @@ StaticFileHandler::~StaticFileHandler() {
 }
 
 boost::beast::http::response<boost::beast::http::string_body>
-StaticFileHandler::handle_request(const boost::beast::http::request<boost::beast::http::string_body>& req) {
+StaticFileHandler::handle_request(const boost::beast::http::request<boost::beast::http::string_body> &req) {
 
     BOOST_LOG_TRIVIAL(info) << "The relative path is: " << relative_path_;
 
@@ -44,7 +44,7 @@ StaticFileHandler::handle_request(const boost::beast::http::request<boost::beast
     return res;
 }
 
-std::string StaticFileHandler::determineContentType(const std::string& path) {
+std::string StaticFileHandler::determineContentType(const std::string &path) {
     if (endsWith(path, ".html")) return "text/html";
     if (endsWith(path, ".jpg") || endsWith(path, ".jpeg")) return "image/jpeg";
     if (endsWith(path, ".png")) return "image/png";
@@ -53,7 +53,7 @@ std::string StaticFileHandler::determineContentType(const std::string& path) {
     return "application/octet-stream"; // Default MIME type
 }
 
-bool StaticFileHandler::endsWith(const std::string& value, const std::string& ending) {
+bool StaticFileHandler::endsWith(const std::string &value, const std::string &ending) {
     if (ending.size() > value.size()) return false;
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }

@@ -27,7 +27,12 @@ class NginxConfig {
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
   int GetPort() const;  // Add a method to get the port number
   std::map<std::string, RequestHandlerFactory*>* getPathMap() const;
-  std::string getRootPath() const;
+
+private:
+  /**
+   * Parse the block and extract the handler parameter name and value pairs
+   */
+  [[nodiscard]] std::map<std::string, std::string> getParams() const;
 };
 
 // The driver that parses a config file and generates an NginxConfig.

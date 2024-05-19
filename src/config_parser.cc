@@ -59,14 +59,11 @@ std::map<std::string, RequestHandlerFactory*>* NginxConfig::getPathMap() const {
                 }
 
                 std::string handlerType = statement->tokens_[2]; // Find type
-                std::string rootPath = "";
+                std::map<std::string, std::string> handler_params;
                 if (statement->child_block_) {
-                    rootPath = statement->child_block_->getRootPath(); // Find the root path from child block
-                    while (!rootPath.empty() && rootPath.back() == '/') {
-                        rootPath.pop_back();
-                    }
+                    handler_params = statement->child_block_->getParams();
                 }
-                RequestHandlerFactory* factory = new RequestHandlerFactory(handlerType, rootPath);
+                RequestHandlerFactory* factory = new RequestHandlerFactory(handlerType, handler_params);
                 (*map)[url] = factory;
 
             } catch (const std::invalid_argument &e) {
@@ -81,16 +78,6 @@ std::map<std::string, RequestHandlerFactory*>* NginxConfig::getPathMap() const {
         }
     }
     return map; // Return the pointer to the map
-}
-
-std::string NginxConfig::getRootPath() const{
-    for (const auto& statement : statements_) {
-        // Check if the statement is a 'root'
-        if (statement->tokens_.size() > 1 && statement->tokens_[0] == "root") {
-            return statement->tokens_[1]; // return the root path
-        }
-    }
-    return "";
 }
 
 
@@ -114,6 +101,29 @@ int NginxConfig::GetPort() const {
     }
     BOOST_LOG_TRIVIAL(error) <<"No port specified, using default 80 port."<< std::endl;
     return 80; // Return default 80 if no valid port is found
+}
+
+std::map<std::string, std::string> NginxConfig::getParams() const {
+    std::map<std::string, std::string> handler_params;
+    for (const auto &statement: statements_) {
+        auto tokens = statement->tokens_;
+
+        // The argument has to be specified as a key-value pair
+        if (tokens.size() != 2) {
+            BOOST_LOG_TRIVIAL(fatal) << "Invalid handler argument";
+            exit(1);
+        }
+
+        // Remove trailing slashes from the root path
+        if (tokens[0] == "root") {
+            while (!tokens[1].empty() && tokens[1].back() == '/') {
+                tokens[1].pop_back();
+            }
+        }
+
+        handler_params[tokens[0]] = tokens[1];
+    }
+    return handler_params;
 }
 
 

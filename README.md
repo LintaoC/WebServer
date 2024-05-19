@@ -136,8 +136,14 @@ ExampleHandler.h
 #include "RequestHandler.h"
 
 class ExampleHandler : public RequestHandler {
-public:
+public:    
+    // If the handler does not need parameters in construction
     ExampleHandler();
+    
+    // If the handler needs parameters in construcion
+    // The parameters are passed as a map of name-value pairs
+    ExampleHandler(std::map<std::string, std::string> params);
+    
     ~ExampleHandler();
     boost::beast::http::response<boost::beast::http::string_body> handle_request(const boost::beast::http::request<boost::beast::http::string_body>& req) override;
 };
@@ -149,6 +155,10 @@ ExampleHandler.cc
 #include "ExampleHandler.h"
 
 ExampleHandler::ExampleHandler() {
+}
+
+ExampleHandler::ExampleHandler(std::map<std::string, std::string> params) {
+    // Use params to initialize the handler
 }
 
 ExampleHandler::~ExampleHandler() {

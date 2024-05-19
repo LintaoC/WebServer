@@ -14,7 +14,7 @@ protected:
 
 TEST_F(StaticFileHandlerTest, HandlesFileFound) {
 std::string relativePath = "/test.txt";
-handler = new StaticFileHandler(rootPath, relativePath);
+handler = new StaticFileHandler({{"root", rootPath}, {"relative_path", relativePath}});
 
 using namespace boost::beast::http;
 
@@ -34,7 +34,7 @@ EXPECT_EQ(res.body(), "Hello, world!");
 
 TEST_F(StaticFileHandlerTest, HandlesFileNotFound) {
 std::string nonexistentPath = "/nonexistent.txt";
-handler = new StaticFileHandler(rootPath, nonexistentPath);
+handler = new StaticFileHandler({{"root", rootPath}, {"relative_path", nonexistentPath}});
 
 using namespace boost::beast::http;
 

@@ -12,51 +12,62 @@ protected:
 };
 
 TEST_F(RequestHandlerFactoryTest, CreatesEchoHandler) {
-RequestHandlerFactory factory("EchoHandler", rootPath);
-RequestHandler* handler = factory.buildRequestHandler();
-ASSERT_NE(nullptr, handler);
-EXPECT_TRUE(dynamic_cast<EchoHandler*>(handler) != nullptr);
-delete handler;
+    RequestHandlerFactory factory("EchoHandler", {});
+    RequestHandler *handler = factory.buildRequestHandler();
+    ASSERT_NE(nullptr, handler);
+    EXPECT_TRUE(dynamic_cast<EchoHandler *>(handler) != nullptr);
+    delete handler;
 }
 
 TEST_F(RequestHandlerFactoryTest, CreatesStaticFileHandler) {
-RequestHandlerFactory factory("StaticHandler", rootPath);
-factory.setRelativePath(relativePath);
-RequestHandler* handler = factory.buildRequestHandler();
-ASSERT_NE(nullptr, handler);
-StaticFileHandler* staticHandler = dynamic_cast<StaticFileHandler*>(handler);
-EXPECT_TRUE(staticHandler != nullptr);
-delete handler;
+    RequestHandlerFactory factory("StaticHandler", {{"root", rootPath}});
+    factory.setRelativePath(relativePath);
+    RequestHandler *handler = factory.buildRequestHandler();
+    ASSERT_NE(nullptr, handler);
+    StaticFileHandler *staticHandler = dynamic_cast<StaticFileHandler *>(handler);
+    EXPECT_TRUE(staticHandler != nullptr);
+    delete handler;
 }
 
 TEST_F(RequestHandlerFactoryTest, CreatesNotFoundHandler) {
-RequestHandlerFactory factory("NotFoundHandler", rootPath);
-RequestHandler* handler = factory.buildRequestHandler();
-ASSERT_NE(nullptr, handler);
-EXPECT_TRUE(dynamic_cast<NotFoundHandler*>(handler) != nullptr);
-delete handler;
+    RequestHandlerFactory factory("NotFoundHandler", {});
+    RequestHandler *handler = factory.buildRequestHandler();
+    ASSERT_NE(nullptr, handler);
+    EXPECT_TRUE(dynamic_cast<NotFoundHandler *>(handler) != nullptr);
+    delete handler;
 }
 
 TEST_F(RequestHandlerFactoryTest, HandlesUnknownHandlerType) {
-RequestHandlerFactory factory("InvalidHandler", rootPath);
-RequestHandler* handler = factory.buildRequestHandler();
-ASSERT_NE(nullptr, handler);
-EXPECT_TRUE(dynamic_cast<NotFoundHandler*>(handler) != nullptr);
-delete handler;
+    RequestHandlerFactory factory("InvalidHandler", {});
+    RequestHandler *handler = factory.buildRequestHandler();
+    ASSERT_NE(nullptr, handler);
+    EXPECT_TRUE(dynamic_cast<NotFoundHandler *>(handler) != nullptr);
+    delete handler;
 }
 
 TEST_F(RequestHandlerFactoryTest, CorrectlyGetsHandlerType) {
-RequestHandlerFactory factory("EchoHandler", rootPath);
-EXPECT_EQ("EchoHandler", factory.getHandlerType());
-}
-
-TEST_F(RequestHandlerFactoryTest, CorrectlyGetsRootPath) {
-RequestHandlerFactory factory("EchoHandler", rootPath);
-EXPECT_EQ(rootPath, factory.getRootPath());
+    RequestHandlerFactory factory("EchoHandler", {});
+    EXPECT_EQ("EchoHandler", factory.getHandlerType());
 }
 
 TEST_F(RequestHandlerFactoryTest, CorrectlyGetsAndSetsRelativePath) {
-RequestHandlerFactory factory("StaticHandler", rootPath);
-factory.setRelativePath(relativePath);
-EXPECT_EQ(relativePath, factory.getRelativePath());
+    RequestHandlerFactory factory("StaticHandler", {{"root", rootPath}});
+    factory.setRelativePath(relativePath);
+    EXPECT_EQ(relativePath, factory.getRelativePath());
+}
+
+TEST_F(RequestHandlerFactoryTest, CorrectlyGetsHandlerParams) {
+    std::map<std::string, std::string> params = {
+            {"root", rootPath},
+            {"arg1", "val1"},
+            {"arg2", "val2"}
+    };
+    auto expected_params = params;
+    expected_params["relative_path"] = relativePath;
+
+    RequestHandlerFactory factory("StaticHandler", params);
+    factory.setRelativePath(relativePath);
+    std::map<std::string, std::string> handlerParams = factory.getHandlerParams();
+
+    EXPECT_EQ(expected_params, handlerParams);
 }
