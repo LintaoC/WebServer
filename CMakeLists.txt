@@ -16,8 +16,10 @@ add_subdirectory(/usr/src/googletest googletest)
 # Use static libraries so binaries can be deployed without a full boost install
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.50 REQUIRED COMPONENTS system log log_setup)
+find_package(Boost REQUIRED)  # Add this to find the general Boost package
 message(STATUS "Boost version: ${Boost_VERSION}")
 
+include_directories(${Boost_INCLUDE_DIRS})
 include_directories(include)
 
 # Library for handling parsing configuration files
@@ -42,7 +44,17 @@ target_link_libraries(server_core Boost::system Boost::log Boost::log_setup)
 add_executable(server src/server_main.cc)
 target_link_libraries(server server_core config_parser Boost::log_setup Boost::log)
 
+# EntityDatabase library
+add_library(EntityDatabase src/EntityDatabase.cc)
+target_include_directories(EntityDatabase PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(EntityDatabase Boost::system)  
+
 # --- UNIT TEST ---
+# Entity Database Test (TODO: Implement unit tests for EntityDatabase)
+# add_executable(EntityDatabaseTest tests/EntityDatabaseTest.cc)
+# target_link_libraries(EntityDatabaseTest EntityDatabase gtest_main gtest gmock Boost::system)
+# gtest_discover_tests(EntityDatabaseTest WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
 # Handler Factory Test
 add_executable(RequestHandlerFactoryTest tests/RequestHandlerFactoryTest.cc)
 target_link_libraries(RequestHandlerFactoryTest server_core gtest_main gtest gmock Boost::system)

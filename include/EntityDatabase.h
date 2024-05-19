@@ -3,6 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 /**
  * A simple entity storage database.
@@ -32,7 +36,7 @@ public:
      *         Entity object.
      * @note Possible StatusCode to return: Success, FileSystemError.
      */
-    std::pair<StatusCode, int> create_entity(const std::string &entity_name);
+    std::pair<StatusCode, std::string> create_entity(const std::string &entity_name);
 
     /**
      * Delete an Entity object with the given name of given id.
@@ -43,7 +47,7 @@ public:
      * @note Possible StatusCode to return: Success, EntityTypeNotFound,
      *       EntityIDNotFound, FileSystemError.
      */
-    StatusCode delete_entity(const std::string &entity_name, int entity_id);
+    StatusCode delete_entity(const std::string &entity_name, const std::string &entity_id);
 
     /**
      * Write content to the specified entity object
@@ -55,7 +59,7 @@ public:
      * @note Possible StatusCode to return: Success, EntityTypeNotFound,
      *       EntityIDNotFound, FileSystemError.
      */
-    StatusCode write_to_entity(const std::string &entity_name, int entity_id, const std::string &content);
+    StatusCode write_to_entity(const std::string &entity_name, const std::string &entity_id, const std::string &content);
 
     /**
      * Read content stored in an entity object
@@ -66,7 +70,7 @@ public:
      * @note Possible StatusCode to return: Success, EntityTypeNotFound,
      *       EntityIDNotFound, FileSystemError.
      */
-    std::pair<StatusCode, std::string> read_from_entity(const std::string &entity_name, int entity_id) const;
+    std::pair<StatusCode, std::string> read_from_entity(const std::string &entity_name, const std::string &entity_id) const;
 
     /**
      * Get the ids of all existing Entity object with a given type name.
@@ -82,7 +86,7 @@ public:
      * @note Possible StatusCode to return: Success, EntityTypeNotFound,
      *       FileSystemError.
      */
-    std::pair<StatusCode, std::vector<int>> list_entities(const std::string &entity_name) const;
+    std::pair<StatusCode, std::vector<std::string>> list_entities(const std::string &entity_name) const;
 
 private:
     /// The root path to store all Entity files.
