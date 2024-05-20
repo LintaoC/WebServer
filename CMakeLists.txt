@@ -50,10 +50,10 @@ target_include_directories(EntityDatabase PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(EntityDatabase Boost::system)  
 
 # --- UNIT TEST ---
-# Entity Database Test (TODO: Implement unit tests for EntityDatabase)
-# add_executable(EntityDatabaseTest tests/EntityDatabaseTest.cc)
-# target_link_libraries(EntityDatabaseTest EntityDatabase gtest_main gtest gmock Boost::system)
-# gtest_discover_tests(EntityDatabaseTest WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+# Entity Database Test
+add_executable(EntityDatabaseTest tests/EntityDatabaseTest.cc)
+target_link_libraries(EntityDatabaseTest EntityDatabase gtest_main gtest gmock Boost::system)
+gtest_discover_tests(EntityDatabaseTest WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Handler Factory Test
 add_executable(RequestHandlerFactoryTest tests/RequestHandlerFactoryTest.cc)
@@ -93,7 +93,7 @@ gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 # Coverage configuration
 include(cmake/CodeCoverageReportConfig.cmake)
 generate_coverage_report(TARGETS server_core config_parser TESTS config_parser_test server_test session_test
-        EchoHandler_test StaticFileHandlerTest RequestHandlerFactoryTest NotFoundHandler_test)
+        EchoHandler_test StaticFileHandlerTest RequestHandlerFactoryTest NotFoundHandler_test EntityDatabaseTest)
 
 # --- INTEGRATION TEST ---
 add_test(NAME integration_test COMMAND bash ../integration_tests/integration_tests.sh)
