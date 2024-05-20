@@ -1,6 +1,8 @@
 #ifndef API_HANDLER_H
 #define API_HANDLER_H
 
+#include <boost/log/trivial.hpp>
+
 #include "RequestHandler.h"
 #include "EntityDatabase.h"
 
@@ -12,7 +14,7 @@
  */
 class CRUDHandler : public RequestHandler {
 public:
-    explicit CRUDHandler(std::shared_ptr<EntityDatabase> entity_database);
+    explicit CRUDHandler(const std::map<std::string, std::string>& params);
 
     ~CRUDHandler() override;
 
@@ -32,7 +34,14 @@ private:
     /// Handles a DELETE request
     Response handle_delete(const Request &req);
 
+    /// The root path for the entities
+    const std::string root_path_;
+
+    /// The database of entities
     std::shared_ptr<EntityDatabase> entity_database_;
+
+    /// Extracts the parts of a path, remove /api/
+    std::vector<std::string> extract_path_parts(const std::string &target);
 };
 
 #endif //API_HANDLER_H

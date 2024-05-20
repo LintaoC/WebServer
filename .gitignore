@@ -6,6 +6,7 @@ build
 build_*
 mirror
 log
+database
 
 # Ignore build folders
 /CMakeFiles/

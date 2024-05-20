@@ -6,6 +6,7 @@
 #include "RequestHandler.h"
 #include "StaticFileHandler.h"
 #include "NotFoundHandler.h"
+#include "CRUDHandler.h"
 
 // Constructor implementation
 RequestHandlerFactory::RequestHandlerFactory(const std::string &type,
@@ -41,7 +42,10 @@ RequestHandler *RequestHandlerFactory::buildRequestHandler() const {
         return new EchoHandler();
     } else if (handlerType == "StaticHandler") {
         return new StaticFileHandler(handlerParams);
-    } else {
+    } else if (handlerType == "CRUDHandler"){
+        return new CRUDHandler (handlerParams);
+    } // Add a new handler here (if needed)
+    else {
         return new NotFoundHandler();
     }
 }
