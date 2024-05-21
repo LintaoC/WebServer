@@ -1,7 +1,10 @@
 #ifndef API_HANDLER_H
 #define API_HANDLER_H
 
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
 #include <boost/log/trivial.hpp>
+
+#include <boost/bind/bind.hpp>
 
 #include "RequestHandler.h"
 #include "EntityDatabase.h"

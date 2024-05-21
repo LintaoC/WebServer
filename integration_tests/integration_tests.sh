@@ -8,5 +8,13 @@ result1=$?
 bash ../integration_tests/integration_test2.sh
 result2=$?
 
+# Run the third integration test
+bash ../integration_tests/integration_test3.sh
+result3=$?
+
 # Exit with an error if any test failed
-[ $result1 -eq 0 -a $result2 -eq 0 ]
+if [ $result1 -eq 0 ] && [ $result2 -eq 0 ] && [ $result3 -eq 0 ]; then
+    exit 0
+else
+    exit 1
+fi
