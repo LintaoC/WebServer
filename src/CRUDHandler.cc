@@ -9,17 +9,13 @@
 
 namespace http = boost::beast::http;
 
-CRUDHandler::CRUDHandler(const std::map<std::string, std::string>& params) :
-        root_path_(params.at("root")) {
+CRUDHandler::CRUDHandler(std::shared_ptr<EntityDatabase> entity_database) :
+        entity_database_(std::move(entity_database)) {
 }
 
 CRUDHandler::~CRUDHandler() = default;
 
 Response CRUDHandler::handle_request(const Request &req) {
-    std::string full_path = "../" + root_path_ ;
-    BOOST_LOG_TRIVIAL(info) << "The full path for current DB is: " << full_path;
-    entity_database_ = std::make_shared<EntityDatabase>(full_path);
-
     switch (req.method()) {
         case boost::beast::http::verb::post:
             return handle_post(req);
@@ -123,8 +119,6 @@ Response CRUDHandler::handle_get(const Request &req) {
         auto [status, ids] = entity_database_->list_entities(entity_name);
         if (status == EntityDatabase::Success) {
             // List entities
-            std::string entity_name = parts[0];
-            auto [status, ids] = entity_database_->list_entities(entity_name);
             if (status == EntityDatabase::Success) {
                 res.result(boost::beast::http::status::ok);
                 res.set(boost::beast::http::field::content_type, "application/json");

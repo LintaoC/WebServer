@@ -36,7 +36,7 @@ public:
      *         Entity object.
      * @note Possible StatusCode to return: Success, FileSystemError.
      */
-    std::pair<StatusCode, std::string> create_entity(const std::string &entity_name);
+    virtual std::pair<StatusCode, std::string> create_entity(const std::string &entity_name);
 
     /**
      * Delete an Entity object with the given name of given id.
@@ -47,7 +47,7 @@ public:
      * @note Possible StatusCode to return: Success, EntityTypeNotFound,
      *       EntityIDNotFound, FileSystemError.
      */
-    StatusCode delete_entity(const std::string &entity_name, const std::string &entity_id);
+    virtual StatusCode delete_entity(const std::string &entity_name, const std::string &entity_id);
 
     /**
      * Write content to the specified entity object
@@ -59,7 +59,7 @@ public:
      * @note Possible StatusCode to return: Success, EntityTypeNotFound,
      *       EntityIDNotFound, FileSystemError.
      */
-    StatusCode write_to_entity(const std::string &entity_name, const std::string &entity_id, const std::string &content);
+    virtual StatusCode write_to_entity(const std::string &entity_name, const std::string &entity_id, const std::string &content);
 
     /**
      * Read content stored in an entity object
@@ -70,7 +70,7 @@ public:
      * @note Possible StatusCode to return: Success, EntityTypeNotFound,
      *       EntityIDNotFound, FileSystemError.
      */
-    std::pair<StatusCode, std::string> read_from_entity(const std::string &entity_name, const std::string &entity_id) const;
+    virtual std::pair<StatusCode, std::string> read_from_entity(const std::string &entity_name, const std::string &entity_id) const;
 
     /**
      * Get the ids of all existing Entity object with a given type name.
@@ -86,7 +86,7 @@ public:
      * @note Possible StatusCode to return: Success, EntityTypeNotFound,
      *       FileSystemError.
      */
-    std::pair<StatusCode, std::vector<std::string>> list_entities(const std::string &entity_name) const;
+    virtual std::pair<StatusCode, std::vector<std::string>> list_entities(const std::string &entity_name) const;
 
 private:
     /// The root path to store all Entity files.

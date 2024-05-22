@@ -17,7 +17,7 @@
  */
 class CRUDHandler : public RequestHandler {
 public:
-    explicit CRUDHandler(const std::map<std::string, std::string>& params);
+    explicit CRUDHandler(std::shared_ptr<EntityDatabase> entity_database);
 
     ~CRUDHandler() override;
 
@@ -36,9 +36,6 @@ private:
 
     /// Handles a DELETE request
     Response handle_delete(const Request &req);
-
-    /// The root path for the entities
-    const std::string root_path_;
 
     /// The database of entities
     std::shared_ptr<EntityDatabase> entity_database_;

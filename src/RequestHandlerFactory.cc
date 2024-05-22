@@ -7,6 +7,7 @@
 #include "StaticFileHandler.h"
 #include "NotFoundHandler.h"
 #include "CRUDHandler.h"
+#include "EntityDatabase.h"
 
 // Constructor implementation
 RequestHandlerFactory::RequestHandlerFactory(const std::string &type,
@@ -43,7 +44,9 @@ RequestHandler *RequestHandlerFactory::buildRequestHandler() const {
     } else if (handlerType == "StaticHandler") {
         return new StaticFileHandler(handlerParams);
     } else if (handlerType == "CRUDHandler"){
-        return new CRUDHandler (handlerParams);
+        std::string full_path = "../" + handlerParams.at("root") ;
+        std::shared_ptr<EntityDatabase> entityDatabase = std::make_shared<EntityDatabase>(full_path);
+        return new CRUDHandler (entityDatabase);
     } // Add a new handler here (if needed)
     else {
         return new NotFoundHandler();

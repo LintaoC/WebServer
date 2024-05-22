@@ -31,18 +31,20 @@ target_link_libraries(EntityDatabase Boost::system)
 add_library(config_parser src/config_parser.cc src/RequestHandlerFactory.cc src/EchoHandler.cc src/StaticFileHandler.cc src/NotFoundHandler.cc src/CRUDHandler.cc)
 add_library(echo_handler src/EchoHandler.cc)
 add_library(static_handler src/StaticFileHandler.cc)
-add_library(handler_factory src/RequestHandlerFactory.cc src/EchoHandler.cc src/StaticFileHandler.cc src/NotFoundHandler.cc)
+add_library(not_found_handler src/NotFoundHandler.cc)
+add_library(crud_handler src/CRUDHandler.cc)
+add_library(handler_factory src/RequestHandlerFactory.cc src/EchoHandler.cc src/StaticFileHandler.cc src/NotFoundHandler.cc src/CRUDHandler.cc)
 target_link_libraries(echo_handler Boost::system)
 # Library for core server functionality
 add_library(server_core
         src/server.cc
         src/session.cc
+        src/CRUDHandler.cc
+        src/EntityDatabase.cc
         src/EchoHandler.cc
         src/StaticFileHandler.cc
         src/RequestHandlerFactory.cc
         src/NotFoundHandler.cc
-        src/CRUDHandler.cc
-        src/EntityDatabase.cc
 )
 target_link_libraries(server_core Boost::system Boost::log Boost::log_setup)
 #target_link_libraries(server_core echo_handler)
@@ -77,6 +79,11 @@ add_executable(StaticFileHandlerTest tests/static_file_handler_test.cc)
 target_link_libraries(StaticFileHandlerTest server_core gtest_main gtest gmock Boost::system)
 gtest_discover_tests(StaticFileHandlerTest WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
+# CRUD Handler Test
+add_executable(CRUDHandler_test tests/CRUDHandler_test.cc)
+target_link_libraries(CRUDHandler_test server_core gtest_main gtest gmock Boost::system)
+gtest_discover_tests(CRUDHandler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
 # config_parser tests
 add_executable(config_parser_test tests/config_parser_test.cc)
 target_link_libraries(config_parser_test config_parser EntityDatabase gtest_main gtest gmock Boost::log Boost::log_setup)
@@ -94,8 +101,7 @@ gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 
 # Coverage configuration
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server_core config_parser TESTS config_parser_test server_test session_test
-        EchoHandler_test StaticFileHandlerTest RequestHandlerFactoryTest NotFoundHandler_test EntityDatabaseTest)
+generate_coverage_report(TARGETS server_core config_parser EntityDatabase TESTS config_parser_test server_test session_test EntityDatabaseTest CRUDHandler_test EchoHandler_test StaticFileHandlerTest RequestHandlerFactoryTest NotFoundHandler_test)
 
 # --- INTEGRATION TEST ---
 add_test(NAME integration_test COMMAND bash ../integration_tests/integration_tests.sh)
