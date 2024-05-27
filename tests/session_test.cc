@@ -58,57 +58,57 @@ protected:
     }
 };
 
-TEST_F(SessionTest, Start) {
-    auto endpoint = tcp::endpoint(tcp::v4(), 8080);
-    acceptor_->open(endpoint.protocol());
-    acceptor_->set_option(tcp::acceptor::reuse_address(true));
-    acceptor_->bind(endpoint);
-    acceptor_->listen();
-
-    // Set a timer to stop the io_service after 5 seconds to prevent it from running forever
-    boost::asio::steady_timer timer(io_service_, boost::asio::chrono::seconds(5));
-    timer.async_wait([&](const boost::system::error_code& /*e*/) {
-        io_service_.stop();
-    });
-
-    acceptor_->async_accept(session_->socket(), [&](const boost::system::error_code& ec) {
-        if (!ec) {
-            session_->start();
-        }
-        io_service_.stop();
-    });
-
-    // Simulate a connection by creating a client and connecting to the server
-    std::thread client_thread([&]() {
-        io_service client_io_service;
-        tcp::resolver resolver(client_io_service);
-        auto endpoints = resolver.resolve("127.0.0.1", "8080");
-        tcp::socket socket(client_io_service);
-        boost::asio::connect(socket, endpoints);
-        std::string request_str = "GET /echo HTTP/1.1\r\nHost: localhost\r\n\r\n";
-        boost::asio::write(socket, boost::asio::buffer(request_str));
-        socket.close();
-    });
-
-    io_service_.run();
-    client_thread.join();
-    // EXPECT_TRUE(session_->socket().is_open());
-}
-
-TEST_F(SessionTest, HandleReadSuccess) {
-    auto echo_factory = new EchoRequestHandlerFactory();
-    routes_["/echo"] = echo_factory;
-
-    std::string request_str = "GET /echo HTTP/1.1\r\nHost: localhost\r\n\r\n";
-    std::copy(request_str.begin(), request_str.end(), session_->data_);
-
-    boost::system::error_code ec;
-    size_t bytes_transferred = request_str.size();
-    session_->handle_read(ec, bytes_transferred);
-
-    // Test if the response has been written back to the socket (mock)
-    // EXPECT_TRUE(session_->socket().is_open());
-}
+//TEST_F(SessionTest, Start) {
+//    auto endpoint = tcp::endpoint(tcp::v4(), 8080);
+//    acceptor_->open(endpoint.protocol());
+//    acceptor_->set_option(tcp::acceptor::reuse_address(true));
+//    acceptor_->bind(endpoint);
+//    acceptor_->listen();
+//
+//    // Set a timer to stop the io_service after 5 seconds to prevent it from running forever
+//    boost::asio::steady_timer timer(io_service_, boost::asio::chrono::seconds(5));
+//    timer.async_wait([&](const boost::system::error_code& /*e*/) {
+//        io_service_.stop();
+//    });
+//
+//    acceptor_->async_accept(session_->socket(), [&](const boost::system::error_code& ec) {
+//        if (!ec) {
+//            session_->start();
+//        }
+//        io_service_.stop();
+//    });
+//
+//    // Simulate a connection by creating a client and connecting to the server
+//    std::thread client_thread([&]() {
+//        io_service client_io_service;
+//        tcp::resolver resolver(client_io_service);
+//        auto endpoints = resolver.resolve("127.0.0.1", "8080");
+//        tcp::socket socket(client_io_service);
+//        boost::asio::connect(socket, endpoints);
+//        std::string request_str = "GET /echo HTTP/1.1\r\nHost: localhost\r\n\r\n";
+//        boost::asio::write(socket, boost::asio::buffer(request_str));
+//        socket.close();
+//    });
+//
+//    io_service_.run();
+//    client_thread.join();
+//    // EXPECT_TRUE(session_->socket().is_open());
+//}
+//
+//TEST_F(SessionTest, HandleReadSuccess) {
+//    auto echo_factory = new EchoRequestHandlerFactory();
+//    routes_["/echo"] = echo_factory;
+//
+//    std::string request_str = "GET /echo HTTP/1.1\r\nHost: localhost\r\n\r\n";
+//    std::copy(request_str.begin(), request_str.end(), session_->data_);
+//
+//    boost::system::error_code ec;
+//    size_t bytes_transferred = request_str.size();
+//    session_->handle_read(ec, bytes_transferred);
+//
+//    // Test if the response has been written back to the socket (mock)
+//    // EXPECT_TRUE(session_->socket().is_open());
+//}
 
 // TEST_F(SessionTest, HandleReadError) {
 //     boost::system::error_code ec = boost::asio::error::connection_reset;

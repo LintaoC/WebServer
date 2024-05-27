@@ -6,6 +6,7 @@
 #include "RequestHandler.h"
 #include "StaticFileHandler.h"
 #include "NotFoundHandler.h"
+#include "SleepRequestHandler.h"
 #include "CRUDHandler.h"
 #include "EntityDatabase.h"
 
@@ -43,6 +44,8 @@ RequestHandler *RequestHandlerFactory::buildRequestHandler() const {
         return new EchoHandler();
     } else if (handlerType == "StaticHandler") {
         return new StaticFileHandler(handlerParams);
+    } else if (handlerType == "SleepHandler") {
+        return new SleepRequestHandler();
     } else if (handlerType == "CRUDHandler"){
         std::string full_path = "../" + handlerParams.at("root") ;
         std::shared_ptr<EntityDatabase> entityDatabase = std::make_shared<EntityDatabase>(full_path);

@@ -6,11 +6,12 @@
 #include "../include/config_parser.h"
 #include "RequestHandlerFactory.h"
 #include <map>
+#include <boost/shared_ptr.hpp>
 
 class ISessionFactory {
 public:
     virtual ~ISessionFactory() {}
-    virtual session* create(boost::asio::io_service& io_service, std::map<std::string, RequestHandlerFactory*>* routes) = 0;
+    virtual boost::shared_ptr<session> create(boost::asio::io_service& io_service, std::map<std::string, RequestHandlerFactory*>* routes) = 0;
 };
 
 #endif

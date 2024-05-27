@@ -6,6 +6,8 @@
 #include <boost/bind/bind.hpp>
 #include "RequestHandlerFactory.h"
 #include <map>
+#include <boost/shared_ptr.hpp>
+
 using namespace boost::placeholders;
 
 // Constructor for the 'server' class
@@ -16,7 +18,7 @@ server::server(boost::asio::io_service& io_service, short port, ISessionFactory*
 
 // In server::start_accept
 void server::start_accept() {
-    session* new_session = factory_->create(io_service_, routes_);  // Use factory to create a session
+    boost::shared_ptr<session> new_session = factory_->create(io_service_, routes_);  // Use factory to create a session
     if (!new_session) {
         BOOST_LOG_TRIVIAL(error) << "Failed to create new session";
         return;
@@ -28,14 +30,13 @@ void server::start_accept() {
 }
 
 // In server::handle_accept
-void server::handle_accept(session* new_session, const boost::system::error_code& error) {
+void server::handle_accept(boost::shared_ptr<session> new_session, const boost::system::error_code& error) {
     BOOST_LOG_TRIVIAL(info) << "Accepted new connection";
     if (!error) {
         new_session->start();  // Start the session if there was no error
         BOOST_LOG_TRIVIAL(info) << "Session started successfully";
     } else {
         BOOST_LOG_TRIVIAL(error) << "Error accepting connection: " << error.message();
-        delete new_session;  // If there was an error, delete the session object to free resources
     }
     start_accept();  // Call start_accept again to accept next incoming connection
 }

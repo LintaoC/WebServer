@@ -21,3 +21,7 @@ location /static/static StaticHandler {
 location / StaticHandler {
     root ./files/e.html
 }
+
+location /api CRUDHandler {
+    root /mnt/storage/crud
+}

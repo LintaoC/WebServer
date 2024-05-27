@@ -7,6 +7,7 @@
 #include "../include/config_parser.h"
 #include "RequestHandlerFactory.h"
 #include <map>
+#include <boost/shared_ptr.hpp>
 
 using boost::asio::ip::tcp;
 
@@ -17,7 +18,7 @@ public:
     // now its taking a file
     //  server(boost::asio::io_service& io_service, const std::string &config_file);
     void start_accept();
-    void handle_accept(session *new_session, const boost::system::error_code &error);
+    void handle_accept(boost::shared_ptr<session> new_session, const boost::system::error_code &error);
 
     boost::asio::io_service &io_service_;
     tcp::acceptor acceptor_;

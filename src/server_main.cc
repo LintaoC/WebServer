@@ -90,6 +90,10 @@ void init_logging() {
     logging::add_common_attributes();
 }
 
+void worker_thread(boost::asio::io_service& io_service) {
+    io_service.run();
+}
+
 int main(int argc, char* argv[]) {
     init_logging();
     BOOST_LOG_TRIVIAL(trace) << "Initializing server logging";
@@ -118,27 +122,45 @@ int main(int argc, char* argv[]) {
 
     std::map<std::string, RequestHandlerFactory*>* routes = config.getPathMap();
 
-
     boost::asio::io_service io_service;
     SessionFactory factory;
+
     try {
         server s(io_service, port, &factory, routes);
         BOOST_LOG_TRIVIAL(debug) << "Server initialized successfully on port: " << port;
-        io_service.run();
+
+        // Create a pool of threads to run all of the io_services.
+        std::vector<std::thread> threads;
+        std::size_t thread_count = std::thread::hardware_concurrency();
+        if (thread_count < 4) {
+            thread_count = 4;  // Default to 4 if less than 4
+        }
+
+        // Launch threads to process the io_service
+        for (std::size_t i = 0; i < thread_count; ++i) {
+            threads.emplace_back(std::thread(worker_thread, std::ref(io_service)));
+        }
+
+        // Handle signals for graceful shutdown
+        boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
+        signals.async_wait(
+                [&](const boost::system::error_code& error, int signal_number) {
+                    BOOST_LOG_TRIVIAL(info) << "Server terminating by signal: " << signal_number;
+                    io_service.stop();
+                }
+        );
+
+        // Wait for all threads to complete
+        for (auto& t : threads) {
+            t.join();
+        }
+
+        BOOST_LOG_TRIVIAL(info) << "Server shutdown successfully";
     } catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << "\n";
         BOOST_LOG_TRIVIAL(fatal) << "Server initialization failed: " << e.what();
         return 1;
     }
 
-    boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
-    signals.async_wait(
-        [&](const boost::system::error_code& error, int signal_number) {
-            BOOST_LOG_TRIVIAL(info) << "Server terminating by signal: " << signal_number;
-            io_service.stop();
-        }
-    );
-
-    BOOST_LOG_TRIVIAL(info) << "Server shutdown successfully";
     return 0;
 }
