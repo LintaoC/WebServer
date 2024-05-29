@@ -9,6 +9,7 @@
 #include "SleepRequestHandler.h"
 #include "CRUDHandler.h"
 #include "EntityDatabase.h"
+#include "HealthHandler.h"
 
 // Constructor implementation
 RequestHandlerFactory::RequestHandlerFactory(const std::string &type,
@@ -50,7 +51,10 @@ RequestHandler *RequestHandlerFactory::buildRequestHandler() const {
         std::string full_path = "../" + handlerParams.at("root") ;
         std::shared_ptr<EntityDatabase> entityDatabase = std::make_shared<EntityDatabase>(full_path);
         return new CRUDHandler (entityDatabase);
-    } // Add a new handler here (if needed)
+    } 
+    else if (handlerType == "HealthHandler") {
+        return new HealthHandler();
+    }
     else {
         return new NotFoundHandler();
     }

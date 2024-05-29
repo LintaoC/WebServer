@@ -110,6 +110,58 @@ protected:
 //    // EXPECT_TRUE(session_->socket().is_open());
 //}
 
+TEST_F(SessionTest, HandleBadRequestMissingVersion) {
+    // Simulate a malformed request with missing HTTP version
+    std::string malformed_request_str = "GET / HTTP\r\nHost: localhost\r\n\r\n";
+    std::copy(malformed_request_str.begin(), malformed_request_str.end(), session_->data_);
+
+    boost::system::error_code ec;
+    size_t bytes_transferred = malformed_request_str.size();
+    session_->handle_read(ec, bytes_transferred);
+
+    // The expectation is that the session will generate a 400 Bad Request response
+    // Assume the session class has been modified to allow access to the last response for testing
+    // ASSERT_EQ(session_->last_response_.result(), boost::beast::http::status::bad_request);
+}
+TEST_F(SessionTest, HandleBadRequestBadMethod) {
+    // Simulate a malformed request with missing HTTP version
+    std::string malformed_request_str = "INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    std::copy(malformed_request_str.begin(), malformed_request_str.end(), session_->data_);
+
+    boost::system::error_code ec;
+    size_t bytes_transferred = malformed_request_str.size();
+    session_->handle_read(ec, bytes_transferred);
+
+    // The expectation is that the session will generate a 400 Bad Request response
+    // Assume the session class has been modified to allow access to the last response for testing
+    // ASSERT_EQ(session_->last_response_.result(), boost::beast::http::status::bad_request);
+}
+TEST_F(SessionTest, HandleBadRequestMalformedHeader) {
+    // Simulate a malformed request with a malformed header
+    std::string malformed_request_str = "GET / HTTP/1.1\r\nHost: localhost\r\nInvalid-Header\r\n\r\n";
+    std::copy(malformed_request_str.begin(), malformed_request_str.end(), session_->data_);
+
+    boost::system::error_code ec;
+    size_t bytes_transferred = malformed_request_str.size();
+    session_->handle_read(ec, bytes_transferred);
+
+    // The expectation is that the session will generate a 400 Bad Request response
+    // Assume the session class has been modified to allow access to the last response for testing
+    // ASSERT_EQ(session_->last_response_.result(), boost::beast::http::status::bad_request);
+}
+
+TEST_F(SessionTest, HandleBadRequestNoHeaders) {
+    // Simulate a malformed request with no headers
+    std::string malformed_request_str = "GET / HTTP/1.1\r\n\r\n";
+    std::copy(malformed_request_str.begin(), malformed_request_str.end(), session_->data_);
+
+    boost::system::error_code ec;
+    size_t bytes_transferred = malformed_request_str.size();
+    session_->handle_read(ec, bytes_transferred);
+
+}
+
+
 // TEST_F(SessionTest, HandleReadError) {
 //     boost::system::error_code ec = boost::asio::error::connection_reset;
 //     size_t bytes_transferred = 0;

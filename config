@@ -28,3 +28,6 @@ location /api CRUDHandler {
 
 location /sleep SleepHandler {
 }
+
+location /health HealthHandler { # no arguments
+}

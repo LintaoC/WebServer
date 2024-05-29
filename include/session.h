@@ -21,6 +21,8 @@ public:
 
 //private:
     virtual void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
+    bool validate_request(const boost::beast::http::request<boost::beast::http::string_body>& req);
+    void send_bad_request_response();
     RequestHandlerFactory* getRequestHandlerFactory(const std::string& path, std::map<std::string, RequestHandlerFactory*>* routes);
     void handle_write(const boost::system::error_code& ec, std::size_t bytes_transferred);
 
