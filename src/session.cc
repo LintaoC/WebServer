@@ -1,4 +1,5 @@
-#include "../include/session.h"
+#include "session.h"
+#include "LoggingUtility.h"
 #include <boost/bind/bind.hpp>
 #include <sstream>
 #include <ctime>
@@ -71,6 +72,8 @@ void session::handle_read(const boost::system::error_code& ec, std::size_t bytes
             RequestHandler* handler = factory->buildRequestHandler();
             boost::beast::http::response<boost::beast::http::string_body> response = handler->handle_request(req);
             delete handler;
+
+            log_response_metrics(req, response, factory->getHandlerType(), socket_.remote_endpoint());
             // Serialize and write the response asynchronously
             auto sp = std::make_shared<boost::beast::http::response<boost::beast::http::string_body>>(std::move(response));
             boost::beast::http::async_write(socket_, *sp,
