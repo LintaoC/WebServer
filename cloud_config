@@ -25,3 +25,6 @@ location / StaticHandler {
 location /api CRUDHandler {
     root /mnt/storage/crud
 }
+
+location /health HealthHandler { # no arguments
+}

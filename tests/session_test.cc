@@ -1,208 +1,145 @@
 #include <gtest/gtest.h>
 #include <boost/asio.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
-#include <boost/log/utility/setup/console.hpp>
 #include "../include/session.h"
 #include "../include/RequestHandlerFactory.h"
 #include "../include/RequestHandler.h"
+#include <boost/beast/http.hpp>
+#include <memory>
 
-using namespace testing;
-using namespace boost::asio;
-using namespace boost::beast::http;
-using ip::tcp;
+using boost::asio::ip::tcp;
 
-class EchoRequestHandler : public RequestHandler {
+// Mock class for RequestHandler
+class MockRequestHandler : public RequestHandler {
 public:
-    response<string_body> handle_request(const request<string_body>& req) override {
-        response<string_body> res{status::ok, req.version()};
-        res.set(field::server, "Test");
-        res.set(field::content_type, "text/plain");
-        res.body() = "Echo";
+    MockRequestHandler() = default;
+
+    boost::beast::http::response<boost::beast::http::string_body> handle_request(const boost::beast::http::request<boost::beast::http::string_body>& req) override {
+        boost::beast::http::response<boost::beast::http::string_body> res;
+        res.result(boost::beast::http::status::ok);
+        res.body() = "Mock response";
         res.prepare_payload();
         return res;
     }
 };
 
-class EchoRequestHandlerFactory : public RequestHandlerFactory {
+// Mock class for RequestHandlerFactory
+class MockRequestHandlerFactory : public RequestHandlerFactory {
 public:
-    EchoRequestHandlerFactory() : RequestHandlerFactory("EchoHandler", {{"root", "/echo"}}) {}
+    MockRequestHandlerFactory() : RequestHandlerFactory("", {}) {}
+
     RequestHandler* buildRequestHandler() const override {
-        return new EchoRequestHandler();
+        return new MockRequestHandler();
     }
 };
 
-class SessionTest : public Test {
+// Test fixture for session
+class SessionTest : public ::testing::Test {
 protected:
-    io_service io_service_;
-    std::map<std::string, RequestHandlerFactory*> routes_;
-    std::shared_ptr<session> session_;
-    std::shared_ptr<tcp::acceptor> acceptor_;
+    boost::asio::io_service io_service;
+    std::map<std::string, RequestHandlerFactory*> routes;
 
     void SetUp() override {
-        auto echo_factory = new EchoRequestHandlerFactory();
-        routes_["/echo"] = echo_factory;
-        session_ = std::make_shared<session>(io_service_, &routes_);
-        acceptor_ = std::make_shared<tcp::acceptor>(io_service_);
-
-        // Initialize logging
-        boost::log::add_common_attributes();
-        boost::log::add_console_log(std::cout, boost::log::keywords::format = "%TimeStamp% [%Severity%]: %Message%");
+        routes["/mock"] = new MockRequestHandlerFactory();
     }
 
     void TearDown() override {
-        for (auto& route : routes_) {
+        for (auto& route : routes) {
             delete route.second;
         }
     }
+
+    std::shared_ptr<session> create_session() {
+        return std::make_shared<session>(io_service, &routes);
+    }
+
+    void simulate_read(std::shared_ptr<session> s, const std::string& request) {
+        boost::system::error_code ec;
+        std::memcpy(s->data_, request.c_str(), request.size());
+
+        io_service.post([s, ec, request_size = request.size()]() {
+            s->handle_read(ec, request_size);
+        });
+
+        io_service.run();
+        io_service.reset();
+    }
 };
 
-//TEST_F(SessionTest, Start) {
-//    auto endpoint = tcp::endpoint(tcp::v4(), 8080);
-//    acceptor_->open(endpoint.protocol());
-//    acceptor_->set_option(tcp::acceptor::reuse_address(true));
-//    acceptor_->bind(endpoint);
-//    acceptor_->listen();
-//
-//    // Set a timer to stop the io_service after 5 seconds to prevent it from running forever
-//    boost::asio::steady_timer timer(io_service_, boost::asio::chrono::seconds(5));
-//    timer.async_wait([&](const boost::system::error_code& /*e*/) {
-//        io_service_.stop();
-//    });
-//
-//    acceptor_->async_accept(session_->socket(), [&](const boost::system::error_code& ec) {
-//        if (!ec) {
-//            session_->start();
-//        }
-//        io_service_.stop();
-//    });
-//
-//    // Simulate a connection by creating a client and connecting to the server
-//    std::thread client_thread([&]() {
-//        io_service client_io_service;
-//        tcp::resolver resolver(client_io_service);
-//        auto endpoints = resolver.resolve("127.0.0.1", "8080");
-//        tcp::socket socket(client_io_service);
-//        boost::asio::connect(socket, endpoints);
-//        std::string request_str = "GET /echo HTTP/1.1\r\nHost: localhost\r\n\r\n";
-//        boost::asio::write(socket, boost::asio::buffer(request_str));
-//        socket.close();
-//    });
-//
-//    io_service_.run();
-//    client_thread.join();
-//    // EXPECT_TRUE(session_->socket().is_open());
-//}
-//
-//TEST_F(SessionTest, HandleReadSuccess) {
-//    auto echo_factory = new EchoRequestHandlerFactory();
-//    routes_["/echo"] = echo_factory;
-//
-//    std::string request_str = "GET /echo HTTP/1.1\r\nHost: localhost\r\n\r\n";
-//    std::copy(request_str.begin(), request_str.end(), session_->data_);
-//
-//    boost::system::error_code ec;
-//    size_t bytes_transferred = request_str.size();
-//    session_->handle_read(ec, bytes_transferred);
-//
-//    // Test if the response has been written back to the socket (mock)
-//    // EXPECT_TRUE(session_->socket().is_open());
-//}
+TEST_F(SessionTest, ValidateRequest_Valid) {
+    auto sess = create_session();
+    boost::beast::http::request<boost::beast::http::string_body> req;
+    req.method(boost::beast::http::verb::get);
+    req.set(boost::beast::http::field::host, "localhost");
 
-TEST_F(SessionTest, HandleBadRequestMissingVersion) {
-    // Simulate a malformed request with missing HTTP version
-    std::string malformed_request_str = "GET / HTTP\r\nHost: localhost\r\n\r\n";
-    std::copy(malformed_request_str.begin(), malformed_request_str.end(), session_->data_);
-
-    boost::system::error_code ec;
-    size_t bytes_transferred = malformed_request_str.size();
-    session_->handle_read(ec, bytes_transferred);
-
-    // The expectation is that the session will generate a 400 Bad Request response
-    // Assume the session class has been modified to allow access to the last response for testing
-    // ASSERT_EQ(session_->last_response_.result(), boost::beast::http::status::bad_request);
-}
-TEST_F(SessionTest, HandleBadRequestBadMethod) {
-    // Simulate a malformed request with missing HTTP version
-    std::string malformed_request_str = "INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n";
-    std::copy(malformed_request_str.begin(), malformed_request_str.end(), session_->data_);
-
-    boost::system::error_code ec;
-    size_t bytes_transferred = malformed_request_str.size();
-    session_->handle_read(ec, bytes_transferred);
-
-    // The expectation is that the session will generate a 400 Bad Request response
-    // Assume the session class has been modified to allow access to the last response for testing
-    // ASSERT_EQ(session_->last_response_.result(), boost::beast::http::status::bad_request);
-}
-TEST_F(SessionTest, HandleBadRequestMalformedHeader) {
-    // Simulate a malformed request with a malformed header
-    std::string malformed_request_str = "GET / HTTP/1.1\r\nHost: localhost\r\nInvalid-Header\r\n\r\n";
-    std::copy(malformed_request_str.begin(), malformed_request_str.end(), session_->data_);
-
-    boost::system::error_code ec;
-    size_t bytes_transferred = malformed_request_str.size();
-    session_->handle_read(ec, bytes_transferred);
-
-    // The expectation is that the session will generate a 400 Bad Request response
-    // Assume the session class has been modified to allow access to the last response for testing
-    // ASSERT_EQ(session_->last_response_.result(), boost::beast::http::status::bad_request);
+    EXPECT_TRUE(sess->validate_request(req));
 }
 
-TEST_F(SessionTest, HandleBadRequestNoHeaders) {
-    // Simulate a malformed request with no headers
-    std::string malformed_request_str = "GET / HTTP/1.1\r\n\r\n";
-    std::copy(malformed_request_str.begin(), malformed_request_str.end(), session_->data_);
+TEST_F(SessionTest, ValidateRequest_MissingHost) {
+    auto sess = create_session();
+    boost::beast::http::request<boost::beast::http::string_body> req;
+    req.method(boost::beast::http::verb::get);
 
-    boost::system::error_code ec;
-    size_t bytes_transferred = malformed_request_str.size();
-    session_->handle_read(ec, bytes_transferred);
-
+    EXPECT_FALSE(sess->validate_request(req));
 }
 
+TEST_F(SessionTest, ValidateRequest_DuplicateHost) {
+    auto sess = create_session();
+    boost::beast::http::request<boost::beast::http::string_body> req;
+    req.method(boost::beast::http::verb::get);
+    req.set(boost::beast::http::field::host, "localhost");
+    req.insert(boost::beast::http::field::host, "localhost");
 
-// TEST_F(SessionTest, HandleReadError) {
-//     boost::system::error_code ec = boost::asio::error::connection_reset;
-//     size_t bytes_transferred = 0;
-
-//     session_->handle_read(ec, bytes_transferred);
-//     // EXPECT_FALSE(session_->socket().is_open());
-// }
-
-TEST_F(SessionTest, GetRequestHandlerFactory) {
-    auto factory = session_->getRequestHandlerFactory("/echo", &routes_);
-    // EXPECT_EQ(factory, routes_["/echo"]);
+    EXPECT_FALSE(sess->validate_request(req));
 }
 
-TEST_F(SessionTest, HandleAcceptError) {
-    auto endpoint = tcp::endpoint(tcp::v4(), 8080);
-    acceptor_->open(endpoint.protocol());
-    acceptor_->set_option(tcp::acceptor::reuse_address(true));
-    acceptor_->bind(endpoint);
-    acceptor_->listen();
+TEST_F(SessionTest, ValidateRequest_InvalidCharactersInHeader) {
+    auto sess = create_session();
+    boost::beast::http::request<boost::beast::http::string_body> req;
+    req.method(boost::beast::http::verb::get);
+    req.set(boost::beast::http::field::host, "localhost");
+    req.set("Invalid-Header-Name-!", "value");
 
-    // Set a timer to stop the io_service after 5 seconds to prevent it from running forever
-    boost::asio::steady_timer timer(io_service_, boost::asio::chrono::seconds(5));
-    timer.async_wait([&](const boost::system::error_code& /*e*/) {
-        io_service_.stop();
-    });
-
-    acceptor_->async_accept(session_->socket(), [&](const boost::system::error_code& ec) {
-        session_->handle_read(ec, 0);
-        io_service_.stop();
-    });
-
-    io_service_.run();
-    // EXPECT_FALSE(session_->socket().is_open());
+    EXPECT_FALSE(sess->validate_request(req));
 }
+
+TEST_F(SessionTest, ValidateRequest_NonAsciiURI) {
+    auto sess = create_session();
+    boost::beast::http::request<boost::beast::http::string_body> req;
+    req.method(boost::beast::http::verb::get);
+    req.set(boost::beast::http::field::host, "localhost");
+    req.target("/nonascii\xe2\x28\xa1");
+
+    EXPECT_FALSE(sess->validate_request(req));
+}
+
+TEST_F(SessionTest, ValidateRequest_MissingContentLengthInPost) {
+    auto sess = create_session();
+    boost::beast::http::request<boost::beast::http::string_body> req;
+    req.method(boost::beast::http::verb::post);
+    req.set(boost::beast::http::field::host, "localhost");
+
+    EXPECT_FALSE(sess->validate_request(req));
+}
+
+TEST_F(SessionTest, GetRequestHandlerFactory_NoMatch) {
+    auto sess = create_session();
+    std::string path = "/nomatch";
+    RequestHandlerFactory* factory = sess->getRequestHandlerFactory(path, &routes);
+
+    EXPECT_NE(factory, nullptr);
+    delete factory;  // Clean up the allocated factory
+}
+
+TEST_F(SessionTest, GetRequestHandlerFactory_Match) {
+    auto sess = create_session();
+    std::string path = "/mock/path";
+    RequestHandlerFactory* factory = sess->getRequestHandlerFactory(path, &routes);
+
+    EXPECT_EQ(factory, routes["/mock"]);
+}
+
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
-
-    // Initialize Boost.Log
-    boost::log::add_common_attributes();
-    boost::log::add_console_log(std::cout, boost::log::keywords::format = "%TimeStamp% [%Severity%]: %Message%");
-
     return RUN_ALL_TESTS();
 }

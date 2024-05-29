@@ -15,6 +15,7 @@ private:
 
 public:
     // Constructor with parameters for handler type and root path
+    RequestHandlerFactory() = default;
     RequestHandlerFactory(const std::string& type, const std::map<std::string, std::string>& handler_params);
 
     // Getters

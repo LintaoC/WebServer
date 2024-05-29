@@ -34,67 +34,75 @@ void session::start()
 }
 
 void session::handle_read(const boost::system::error_code& ec, std::size_t bytes_transferred) {
-    auto self = shared_from_this();
-    if (!ec) {
-        BOOST_LOG_TRIVIAL(info) << "Successfully read";
-        // Assuming 'data_' is a suitable buffer where data from socket is read into.
-        // Ensure 'data_' is declared, probably as a member of 'session'.
-        // Prepare the multi_buffer for input
-        boost::beast::multi_buffer buffer;
-        // Write data into the multi_buffer
-        buffer.commit(boost::asio::buffer_copy(buffer.prepare(bytes_transferred), boost::asio::buffer(data_, bytes_transferred)));
-        // Create and use the parser
-        boost::beast::http::request_parser<boost::beast::http::string_body> parser;
-        parser.eager(true); // Optional: parse headers eagerly
-        // Parse the HTTP request from the buffer
-        boost::system::error_code parse_ec;
-        parser.put(buffer.data(), parse_ec);
-        if (parse_ec) {
-            BOOST_LOG_TRIVIAL(error) << "Parsing failed: " << parse_ec.message();
-            send_bad_request_response();
-            return;
-        }
-        if (parser.is_done()) {
-            // Complete parsing, extract the request
-            auto req = parser.release();
-            BOOST_LOG_TRIVIAL(info) << "Request parsed with method: " << req.method() << ", target: " << req.target()
-                                    << ", version: " << req.version() << ", body: " << req.body();
-            if (!validate_request(req)) {
+    std::cerr << "get into the handle_read" << std::endl;
+    try {
+        auto self = shared_from_this();
+        std::cerr << "after shared_from_this() function" << std::endl;
+        if (!ec) {
+            std::cerr << "get into the !ec" << std::endl;
+            BOOST_LOG_TRIVIAL(info) << "Successfully read";
+            boost::beast::multi_buffer buffer;
+            buffer.commit(boost::asio::buffer_copy(buffer.prepare(bytes_transferred), boost::asio::buffer(data_, bytes_transferred)));
+            boost::beast::http::request_parser<boost::beast::http::string_body> parser;
+            parser.eager(true);
+            boost::system::error_code parse_ec;
+            parser.put(buffer.data(), parse_ec);
+            if (parse_ec) {
+                std::cerr << "get into the parse_ec" << std::endl;
+                BOOST_LOG_TRIVIAL(error) << "Parsing failed: " << parse_ec.message();
                 send_bad_request_response();
                 return;
             }
-            RequestHandlerFactory* factory = getRequestHandlerFactory(std::string(req.target()), routes_);
-            if (!factory) {
-                BOOST_LOG_TRIVIAL(error) << "No matching handler found";
-                send_bad_request_response();
-                return;
-            }
-            RequestHandler* handler = factory->buildRequestHandler();
-            boost::beast::http::response<boost::beast::http::string_body> response = handler->handle_request(req);
-            delete handler;
+            if (parser.is_done()) {
+                std::cerr << "get into the parser done" << std::endl;
+                auto req = parser.release();
+                BOOST_LOG_TRIVIAL(info) << "Request parsed with method: " << req.method() << ", target: " << req.target()
+                                        << ", version: " << req.version() << ", body: " << req.body();
+                if (!validate_request(req)) {
+                    std::cerr << "get into non validate request" << std::endl;
+                    send_bad_request_response();
+                    return;
+                }
+                std::cerr << "it is validate request" << std::endl;
+                RequestHandlerFactory* factory = getRequestHandlerFactory(std::string(req.target()), routes_);
+                std::cerr << "after getting requestHandlerfactory" << std::endl;
+                if (!factory) {
+                    BOOST_LOG_TRIVIAL(error) << "No matching handler found";
+                    send_bad_request_response();
+                    return;
+                }
+                RequestHandler* handler = factory->buildRequestHandler();
+                std::cerr << "after creating handler" << std::endl;
+                boost::beast::http::response<boost::beast::http::string_body> response = handler->handle_request(req);
+                delete handler;
 
             log_response_metrics(req, response, factory->getHandlerType(), socket_.remote_endpoint());
-            // Serialize and write the response asynchronously
-            auto sp = std::make_shared<boost::beast::http::response<boost::beast::http::string_body>>(std::move(response));
-            boost::beast::http::async_write(socket_, *sp,
-                                            [this, sp, self](const boost::system::error_code& ec, std::size_t length) {
-                                                if (!ec) {
-                                                    BOOST_LOG_TRIVIAL(info) << "Response sent successfully";
-                                                } else {
-                                                    BOOST_LOG_TRIVIAL(error) << "Error sending response: " << ec.message();
-                                                }
-                                                socket_.close();
-                                            });
+                auto sp = std::make_shared<boost::beast::http::response<boost::beast::http::string_body>>(std::move(response));
+                std::cerr << "start write" << std::endl;
+                boost::beast::http::async_write(socket_, *sp,
+                                                [this, sp, self](const boost::system::error_code& ec, std::size_t length) {
+                                                    if (!ec) {
+                                                        BOOST_LOG_TRIVIAL(info) << "Response sent successfully";
+                                                    } else {
+                                                        BOOST_LOG_TRIVIAL(error) << "Error sending response: " << ec.message();
+                                                    }
+                                                    socket_.close();
+                                                });
+                std::cerr << "after write" << std::endl;
+            } else {
+                socket_.async_read_some(boost::asio::buffer(data_, max_length),
+                                        boost::bind(&session::handle_read, shared_from_this(),
+                                                    boost::asio::placeholders::error,
+                                                    boost::asio::placeholders::bytes_transferred));
+            }
         } else {
-            // If the request is not fully parsed, continue reading
-            socket_.async_read_some(boost::asio::buffer(data_, max_length),
-                                    boost::bind(&session::handle_read, shared_from_this(),
-                                                boost::asio::placeholders::error,
-                                                boost::asio::placeholders::bytes_transferred));
+            std::cerr << "there is a ec" << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "Error on receive: " << ec.message();
+            socket_.close();
         }
-    } else {
-        BOOST_LOG_TRIVIAL(error) << "Error on receive: " << ec.message();
-        socket_.close();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught in handle_read: " << e.what() << std::endl;
+        throw;
     }
 }
 
@@ -108,7 +116,6 @@ bool session::validate_request(const boost::beast::http::request<boost::beast::h
         return false;
     }
 
-    // Check for duplicate Host headers
     int host_count = 0;
     for (auto it = req.begin(); it != req.end(); ++it) {
         if (it->name() == boost::beast::http::field::host) {
@@ -119,7 +126,6 @@ bool session::validate_request(const boost::beast::http::request<boost::beast::h
             return false;
         }
 
-        // Check for invalid characters in header names and values
         std::string header_name = it->name_string().to_string();
         std::string header_value = it->value().to_string();
         if (!std::all_of(header_name.begin(), header_name.end(), [](unsigned char c) { return std::isalnum(c) || c == '-' || c == '_'; }) ||
@@ -129,7 +135,6 @@ bool session::validate_request(const boost::beast::http::request<boost::beast::h
         }
     }
 
-    // Check for non-ASCII characters in URI
     std::string uri = req.target().to_string();
     if (!std::all_of(uri.begin(), uri.end(), [](unsigned char c) { return ::isascii(c); })) {
         BOOST_LOG_TRIVIAL(error) << "Non-ASCII characters in URI";

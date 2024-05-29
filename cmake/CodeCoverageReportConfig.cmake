@@ -78,6 +78,7 @@ function(generate_coverage_report)
                 --filter "${CMAKE_SOURCE_DIR}/src/CRUDHandler.cc" 
                 --filter "${CMAKE_SOURCE_DIR}/src/EntityDatabase.cc" 
                 --filter "${CMAKE_SOURCE_DIR}/src/HealthHandler.cc" 
+                --filter "${CMAKE_SOURCE_DIR}/src/SleepRequestHandler.cc" 
         --exclude "${CMAKE_SOURCE_DIR}/include"
         DEPENDS ${COVERAGE_DATA_STAMP_FILE}
         COMMENT "Generating coverage report"

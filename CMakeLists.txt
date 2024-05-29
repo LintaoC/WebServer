@@ -77,6 +77,11 @@ add_executable(HealthHandler_test tests/HealthHandler_test.cc)
 target_link_libraries(HealthHandler_test server_core gtest_main gtest gmock Boost::system)
 gtest_discover_tests(HealthHandler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
+# Sleep Handler Test
+add_executable(SleepRequestHandler_test tests/SleepRequestHandler_test.cc)
+target_link_libraries(SleepRequestHandler_test server_core gtest_main gtest gmock Boost::system)
+gtest_discover_tests(SleepRequestHandler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
 # Not Found Handler Test
 add_executable(NotFoundHandler_test tests/NotFoundHandlerTest.cc)
 target_link_libraries(NotFoundHandler_test server_core gtest_main gtest gmock Boost::system)
@@ -109,7 +114,7 @@ gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 
 # Coverage configuration
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server_core config_parser EntityDatabase TESTS config_parser_test server_test session_test EntityDatabaseTest CRUDHandler_test EchoHandler_test StaticFileHandlerTest RequestHandlerFactoryTest NotFoundHandler_test HealthHandler_test)
+generate_coverage_report(TARGETS server_core config_parser EntityDatabase TESTS config_parser_test server_test session_test EntityDatabaseTest CRUDHandler_test EchoHandler_test StaticFileHandlerTest RequestHandlerFactoryTest NotFoundHandler_test HealthHandler_test SleepRequestHandler_test)
 
 # --- INTEGRATION TEST ---
 add_test(NAME integration_test COMMAND bash ../integration_tests/integration_tests.sh)
