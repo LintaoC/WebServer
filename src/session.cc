@@ -174,7 +174,7 @@ RequestHandlerFactory* session::getRequestHandlerFactory(const std::string& path
     BOOST_LOG_TRIVIAL(info) << "getRequestHandlerFactory received a path of " << path;
     RequestHandlerFactory* longestMatchFactory = nullptr;
     size_t longestMatchLength = 0;
-    std::string relativePath = "";  // To store the relative path to be set
+    std::string relativePath = "";
 
     for (const auto& route : *routes) {
         const std::string& prefix = route.first;
@@ -189,12 +189,13 @@ RequestHandlerFactory* session::getRequestHandlerFactory(const std::string& path
         }
     }
 
-    if (longestMatchFactory && longestMatchLength > 1) {
+    if ((longestMatchFactory && longestMatchLength > 1) || path.length() == 1) {
         if (!relativePath.empty() && relativePath[0] != '/') {
-            relativePath = '/' + relativePath;  // Ensure leading '/' for relative path
+            relativePath = '/' + relativePath;
         }
         longestMatchFactory->setRelativePath(relativePath);
         return longestMatchFactory;
     }
+
     return new RequestHandlerFactory("", {});
 }
