@@ -1,5 +1,4 @@
 #include "session.h"
-#include "LoggingUtility.h"
 #include <boost/bind/bind.hpp>
 #include <sstream>
 #include <ctime>
@@ -76,7 +75,12 @@ void session::handle_read(const boost::system::error_code& ec, std::size_t bytes
                 boost::beast::http::response<boost::beast::http::string_body> response = handler->handle_request(req);
                 delete handler;
 
-            log_response_metrics(req, response, factory->getHandlerType(), socket_.remote_endpoint());
+            BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics] "
+                                    << "ResponseCode=" << response.result_int() << " "
+                                    << "RequestPath=" << std::string(req.target()) << " "
+                                    << "RequestIP=" << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " "
+                                    << "Handler=" << factory->getHandlerType() << " ";
+            // log_response_metrics(req, response, factory->getHandlerType(), socket_.remote_endpoint());
                 auto sp = std::make_shared<boost::beast::http::response<boost::beast::http::string_body>>(std::move(response));
                 std::cerr << "start write" << std::endl;
                 boost::beast::http::async_write(socket_, *sp,
