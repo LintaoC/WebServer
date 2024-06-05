@@ -80,8 +80,16 @@ GeneratorHandler::handle_request(const boost::beast::http::request<boost::beast:
     BOOST_LOG_TRIVIAL(info) << "test src/project list output: " << output_goto_project;
     output_goto_project = exec_command("cd usr/src/project/src && ls ");
     BOOST_LOG_TRIVIAL(info) << "test src/project/src list output: " << output_goto_project;
-    // Adjust the command to point to the Python script in the parent directory of src
-    std::string command = "python3 /usr/src/project/src/generator.py \"" + description_ + "\" \"" + filename_ + "\"";
+
+    // Adjust the command to point to the Python script and photos directory based on environment
+    std::string script_path = std::getenv("ENVIRONMENT") && std::string(std::getenv("ENVIRONMENT")) == "remote" 
+                                ? "/usr/src/project/src/generator.py"
+                                : "../src/generator.py";
+    std::string photos_dir = std::getenv("ENVIRONMENT") && std::string(std::getenv("ENVIRONMENT")) == "remote"
+                                ? "/usr/src/project/src/photos"
+                                : "../photos";
+    
+    std::string command = "python3 " + script_path + " \"" + description_ + "\" \"" + filename_ + "\"";
     BOOST_LOG_TRIVIAL(info) << "Executing command: " << command;
 
     std::string command_output;
@@ -116,7 +124,7 @@ GeneratorHandler::handle_request(const boost::beast::http::request<boost::beast:
     }
 
     // Full path to the generated image
-    std::string full_path = "/usr/src/project/src/photos/" + filename_ + ".png";
+    std::string full_path = photos_dir + "/" + filename_ + ".png";
     BOOST_LOG_TRIVIAL(info) << "The local path is: " << full_path;
     file_.open(full_path, std::ios::binary);
     if (!file_.is_open()) {

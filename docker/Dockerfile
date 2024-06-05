@@ -27,6 +27,9 @@ COPY --from=builder /usr/src/project/src /usr/src/project/src
 
 RUN pip3 install openai requests
 
+# Set environment variable to indicate remote environment
+ENV ENVIRONMENT=remote
+
 # Expose some port(s)
 EXPOSE 80
 
