@@ -10,6 +10,7 @@
 #include "CRUDHandler.h"
 #include "EntityDatabase.h"
 #include "HealthHandler.h"
+#include "GeneratorHandler.h"
 
 // Constructor implementation
 RequestHandlerFactory::RequestHandlerFactory(const std::string &type,
@@ -54,6 +55,9 @@ RequestHandler *RequestHandlerFactory::buildRequestHandler() const {
     } 
     else if (handlerType == "HealthHandler") {
         return new HealthHandler();
+    }
+    else if (handlerType == "GeneratorHandler") {
+        return new GeneratorHandler(handlerParams);
     }
     else {
         return new NotFoundHandler();

@@ -16,4 +16,9 @@ RUN apt-get update && apt-get install -y \
     libgmock-dev \
     libgtest-dev \
     netcat \
-    gcovr
+    gcovr \
+    python3 \
+    python3-pip  
+
+
+RUN pip3 install openai requests

@@ -48,7 +48,8 @@ Uses `RequestHandlerFactory` to obtain the appropriate request handler for each 
 ## Run Docker and map corresponding port to local
 `docker build -f docker/base.Dockerfile -t f004:base .`\
 `docker build -f docker/Dockerfile -t my_image .`\
-`docker run --rm -p 8080:8080 --name my_run my_image:latest`
+`docker run -d -p 8080:80 --name my_run my_image:latest`
+`docker logs my_run`
 
 ## Create and go to build directory under f004
 

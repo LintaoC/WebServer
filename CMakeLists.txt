@@ -28,13 +28,14 @@ target_include_directories(EntityDatabase PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(EntityDatabase Boost::system)  
 
 # Library for handling parsing configuration files
-add_library(config_parser src/config_parser.cc src/RequestHandlerFactory.cc src/EchoHandler.cc src/StaticFileHandler.cc src/NotFoundHandler.cc src/CRUDHandler.cc src/SleepRequestHandler.cc src/HealthHandler.cc)
+add_library(config_parser src/config_parser.cc src/RequestHandlerFactory.cc src/EchoHandler.cc src/StaticFileHandler.cc src/NotFoundHandler.cc src/CRUDHandler.cc src/SleepRequestHandler.cc src/HealthHandler.cc src/GeneratorHandler.cc)
 add_library(echo_handler src/EchoHandler.cc)
 add_library(static_handler src/StaticFileHandler.cc)
 add_library(not_found_handler src/NotFoundHandler.cc)
 add_library(crud_handler src/CRUDHandler.cc)
 add_library(health_handler src/HealthHandler.cc)
-add_library(handler_factory src/RequestHandlerFactory.cc src/EchoHandler.cc src/StaticFileHandler.cc src/NotFoundHandler.cc src/CRUDHandler.cc  src/SleepRequestHandler.cc src/HealthHandler.cc)
+add_library(generator_handler src/GeneratorHandler.cc)
+add_library(handler_factory src/RequestHandlerFactory.cc src/EchoHandler.cc src/StaticFileHandler.cc src/NotFoundHandler.cc src/CRUDHandler.cc  src/SleepRequestHandler.cc src/HealthHandler.cc src/GeneratorHandler.cc)
 target_link_libraries(echo_handler Boost::system)
 # Library for core server functionality
 add_library(server_core
@@ -48,6 +49,7 @@ add_library(server_core
         src/EntityDatabase.cc
         src/SleepRequestHandler.cc
         src/HealthHandler.cc
+        src/GeneratorHandler.cc
 )
 target_link_libraries(server_core Boost::system Boost::log Boost::log_setup)
 #target_link_libraries(server_core echo_handler)

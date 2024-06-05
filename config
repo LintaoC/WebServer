@@ -22,6 +22,10 @@ location / StaticHandler {
     root ./files/e.html
 }
 
+location /f StaticHandler {
+    root ./files/f.html
+}
+
 location /api CRUDHandler {
     root ./database/
 }
@@ -30,4 +34,7 @@ location /sleep SleepHandler {
 }
 
 location /health HealthHandler { # no arguments
+}
+
+location /generator GeneratorHandler { # no arguments
 }

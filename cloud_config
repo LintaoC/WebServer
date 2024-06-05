@@ -22,9 +22,17 @@ location / StaticHandler {
     root ./files/e.html
 }
 
+location /start StaticHandler {
+    root ./files/f.html
+}
+
+
 location /api CRUDHandler {
     root /mnt/storage/crud
 }
 
 location /health HealthHandler { # no arguments
+}
+
+location /generator GeneratorHandler { # no arguments
 }
