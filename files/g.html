@@ -11,13 +11,35 @@
             height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background: url('background.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            background-color: rgba(255, 255, 255, 0.2);
+            background-blend-mode: lighten;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: -1;
+        }
+
+        .title {
+            margin-top: 20px;
+            color: rgba(0, 0, 0, 0.735);
+            font-size: 32px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
 
         h3 {
             margin-bottom: 20px;
             text-align: center;
-            color: gray;
+            color: #0f0f0fbd;
         }
 
         .container {
@@ -92,7 +114,7 @@
         #progress-bar {
             width: 0%;
             height: 20px;
-            background-color: #4caf50;
+            background-color: #76bee7c6;
             text-align: center;
             line-height: 20px;
             color: white;
@@ -119,7 +141,7 @@
                 } else {
                     clearInterval(progressInterval);
                 }
-            }, 100); // Update every 100ms for smoother progress
+            }, 130); // Update every 130ms for smoother progress
 
             try {
                 const response = await fetch('http://34.16.186.69/generator', {
@@ -159,17 +181,19 @@
     </script>
 </head>
 <body>
-<div class="container">
-    <h3>Please enter the description for generating a picture</h3>
-    <input type="text" id="inputBox" placeholder="Enter text here">
-    <div class="button-container">
-        <button type="button" onclick="sendRequest()">Submit</button>
-        <button type="button" onclick="restartPage()">Restart</button>
+    <div class="overlay"></div>
+    <div class="title">F004 - Text-to-Image Generator</div>
+    <div class="container">
+        <h3>Please enter the description for generating a picture</h3>
+        <input type="text" id="inputBox" placeholder="Enter text here">
+        <div class="button-container">
+            <button type="button" onclick="sendRequest()">Submit</button>
+            <button type="button" onclick="restartPage()">Restart</button>
+        </div>
+        <div id="progress-container">
+            <div id="progress-bar">0%</div>
+        </div>
+        <div id="response"></div>
     </div>
-    <div id="progress-container">
-        <div id="progress-bar">0%</div>
-    </div>
-    <div id="response"></div>
-</div>
 </body>
 </html>
