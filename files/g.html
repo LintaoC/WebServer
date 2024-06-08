@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Photo Generator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        h3 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: gray;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .button-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        #inputBox {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #response {
+            margin-top: 20px;
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: #e0e0e0;
+        }
+
+        #response img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #progress-container {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 20px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }
+    </style>
+    <script>
+        async function sendRequest() {
+            const input = document.getElementById("inputBox").value;
+            const responseDiv = document.getElementById("response");
+            const progressBar = document.getElementById("progress-bar");
+            const progressContainer = document.getElementById("progress-container");
+            responseDiv.innerHTML = 'Generating...'; // Show a loading message
+
+            const formData = new FormData();
+            formData.append("description", input);
+
+            progressContainer.style.display = 'block';
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 95) {
+                    progress += 1;
+                    progressBar.style.width = progress + '%';
+                    progressBar.innerHTML = progress + '%';
+                } else {
+                    clearInterval(progressInterval);
+                }
+            }, 100); // Update every 100ms for smoother progress
+
+            try {
+                const response = await fetch('http://34.16.186.69/generator', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                progressBar.innerHTML = '100%';
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const img = document.createElement("img");
+                    img.src = URL.createObjectURL(blob);
+                    img.alt = 'Generated Image';
+                    responseDiv.innerHTML = ''; // Clear previous content
+                    responseDiv.appendChild(img);
+                } else {
+                    responseDiv.innerHTML = 'Failed response. Please try again.';
+                }
+            } catch (error) {
+                clearInterval(progressInterval);
+                responseDiv.innerHTML = 'Error generating image. Please try again.';
+            } finally {
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    progressBar.innerHTML = '0%';
+                }, 2000); // Hide progress bar after 2 seconds
+            }
+        }
+
+        function restartPage() {
+            location.reload();
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <h3>Please enter the description for generating a picture</h3>
+    <input type="text" id="inputBox" placeholder="Enter text here">
+    <div class="button-container">
+        <button type="button" onclick="sendRequest()">Submit</button>
+        <button type="button" onclick="restartPage()">Restart</button>
+    </div>
+    <div id="progress-container">
+        <div id="progress-bar">0%</div>
+    </div>
+    <div id="response"></div>
+</div>
+</body>
+</html>

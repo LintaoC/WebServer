@@ -26,6 +26,10 @@ location /f StaticHandler {
     root ./files/f.html
 }
 
+location /g StaticHandler {
+  root ./files/g.html
+}
+
 location /api CRUDHandler {
     root ./database/
 }

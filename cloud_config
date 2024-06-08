@@ -26,6 +26,9 @@ location /start StaticHandler {
     root ./files/f.html
 }
 
+location /gen StaticHandler {
+  root ./files/g.html
+}
 
 location /api CRUDHandler {
     root /mnt/storage/crud
