@@ -282,3 +282,10 @@ public:
 
 #endif // ECHO_HANDLER_H
 ```
+
+# Feature
+
+The feature we added is called image-generator
+it basically takes a input from client, typically a phrase, or a word
+then we will pass the request through a handler which connects to chatgpt API
+once the image being produced, we will send it back and display to user
